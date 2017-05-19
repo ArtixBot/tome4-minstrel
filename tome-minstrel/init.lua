@@ -1,0 +1,14 @@
+long_name = "Minstrel"
+short_name = "minstrel"
+for_module = "tome"
+version = {1,5,3}
+addon_version = {1,0,0}
+weight = 100
+author = { "ArtixBot" }
+homepage = "https://github.com/ArtixBot"
+description = [[Adds the Minstrel, a lightly armored duelist who uses the power of song to bolster strength and incapacitate foes.]]
+tags = {'class','subclass','rogue'}
+overload = true
+superload = true
+hooks = true
+data = true
