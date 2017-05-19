@@ -17,8 +17,12 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
--- Physical combat for Spellsword
+-- Physical combat for Minstrel
 newTalentType{ allow_random=true, type="technique/musical-combat", name = "musical combat", description = "Musical combat techniques." }
+newTalentType{ allow_random=true, type="technique/battle-ballads", name = "battle ballads", description = "Bolster your skill in battle." }
+newTalentType{ allow_random=true, type="technique/dirges", name = "dirges", description = "Debuff foes with dolorous dirges." }
+newTalentType{ allow_random=true, type="technique/performance-arts", name = "performance arts", generic = true, description = "The greater the audience, the better the performance!" }
+
 
 -- Generic requires for techs based on talent level
 -- Uses STR
@@ -114,3 +118,6 @@ techs_strdex_req5 = function(self, t) local stat = self:getStr() >= self:getDex(
 -----------------------------
 
 load("/data-minstrel/talents/techniques/musical-combat.lua")
+load("/data-minstrel/talents/techniques/performance-arts.lua")
+load("/data-minstrel/talents/techniques/dirges.lua")
+load("/data-minstrel/talents/techniques/battle-ballads.lua")
