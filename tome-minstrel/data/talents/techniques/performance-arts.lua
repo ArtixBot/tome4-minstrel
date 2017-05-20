@@ -18,7 +18,8 @@
 -- darkgod@te4.org
 
 newTalent{
-	name = "Performance of a Lifetime",
+	--Provides bonuses as more enemies enter a specified area around the user.
+	name = "Expectations of the Audience",
 	type = {"technique/performance-arts", 1},
 	points = 5,
 	require = techs_dex_req1,
@@ -67,7 +68,8 @@ newTalent{
 }
 
 newTalent{
-	name = "Arcane Staminaf",
+	--Increases mental save score and increases resistance to silence effects.
+	name = "Verbosity",
 	type = {"technique/performance-arts", 2},
 	require = techs_req2,
 	no_energy = true,
@@ -113,7 +115,8 @@ newTalent{
 }
 
 newTalent{
-	name = "Arcane Armorf",
+	--Resets the cooldown of music-specific talents currently on cooldown.
+	name = "Moxie",
 	type = {"technique/performance-arts", 3},
 	require = techs_req3,
 	mode = "sustained",
@@ -155,7 +158,8 @@ newTalent{
 }
 
 newTalent{
-	name = "Martial Magicf", -- no cost; it's main purpose is to give the player an alternative means of using mana/stamina based talents
+	--Melee attack which cannot miss, is a critical hit, and has massive armor pentration. High cooldown.
+	name = "Encore", -- no cost; it's main purpose is to give the player an alternative means of using mana/stamina based talents
 	type = {"technique/performance-arts", 4},
 	require = techs_req4,
 	points = 5,

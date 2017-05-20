@@ -18,9 +18,8 @@
 -- darkgod@te4.org
 
 newTalent{
-	-- Increases all vital stats by a small amount. Augmented by the next three skills.
-	name = "Symphony of Superiority",
-	type = {"technique/battle-ballads", 1},
+	name = "Opening Balladadd",
+	type = {"technique/rhapsodies", 1},
 	message = "@Source@ opens with a powerful ballad!",
 	require = techs_dex_req1,
 	points = 5,
@@ -78,8 +77,8 @@ newTalent{
 }
 
 newTalent{
-	name = "Curative Canticle",
-	type = {"technique/battle-ballads", 2},
+	name = "Arcane Staminaabd",
+	type = {"technique/rhapsodies", 2},
 	require = techs_req2,
 	no_energy = true,
 	sustain_mana = 20,
@@ -124,8 +123,8 @@ newTalent{
 }
 
 newTalent{
-	name = "Expression of Endurance",
-	type = {"technique/battle-ballads", 3},
+	name = "Arcane Armorabd",
+	type = {"technique/rhapsodies", 3},
 	require = techs_req3,
 	mode = "sustained",
 	sustain_mana = 30,
@@ -166,8 +165,8 @@ newTalent{
 }
 
 newTalent{
-	name = "Apocalyptic Aria", -- no cost; it's main purpose is to give the player an alternative means of using mana/stamina based talents
-	type = {"technique/battle-ballads", 4},
+	name = "Martial Magicbda", -- no cost; it's main purpose is to give the player an alternative means of using mana/stamina based talents
+	type = {"technique/rhapsodies", 4},
 	require = techs_req4,
 	points = 5,
 	cooldown = 24,

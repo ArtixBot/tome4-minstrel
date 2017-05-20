@@ -18,6 +18,7 @@
 -- darkgod@te4.org
 
 newTalent{
+	-- Charge manuever which buffs user speed for a short period of time
 	name = "Opening Ballad",
 	type = {"technique/musical-combat", 1},
 	message = "@Source@ opens with a powerful ballad!",
@@ -70,14 +71,15 @@ newTalent{
 		return true
 	end,
 	info = function(self, t)
-		return ([[Open with a sudden strike, dealing 150% weapon damage to target unit.
+		return ([[Open with a sudden strike, inflicting 150% weapon damage.
 		Hit targets are disarmed for 3 turns.
 		Because of the momentum required to execute this manuever, the target must be at least 2 tiles away.]])
 	end,
 }
 
 newTalent{
-	name = "Arcane Stamina",
+	-- Inflicts confusion and reduces accuracy of all enemies in an area around the user.
+	name = "Solo",
 	type = {"technique/musical-combat", 2},
 	require = techs_req2,
 	no_energy = true,
@@ -123,7 +125,8 @@ newTalent{
 }
 
 newTalent{
-	name = "Arcane Armor",
+	-- High-damage strike that disarms and stuns.
+	name = "Cadenza",
 	type = {"technique/musical-combat", 3},
 	require = techs_req3,
 	mode = "sustained",
@@ -165,7 +168,8 @@ newTalent{
 }
 
 newTalent{
-	name = "Martial Magic", -- no cost; it's main purpose is to give the player an alternative means of using mana/stamina based talents
+	-- Incredibly powerful attack, but reduces user speed for a short period after usage.
+	name = "Finale",
 	type = {"technique/musical-combat", 4},
 	require = techs_req4,
 	points = 5,

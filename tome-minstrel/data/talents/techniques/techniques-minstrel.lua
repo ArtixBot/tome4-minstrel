@@ -18,9 +18,10 @@
 -- darkgod@te4.org
 
 -- Physical combat for Minstrel
-newTalentType{ allow_random=true, type="technique/musical-combat", name = "musical combat", description = "Musical combat techniques." }
-newTalentType{ allow_random=true, type="technique/battle-ballads", name = "battle ballads", description = "Bolster your skill in battle." }
+newTalentType{ allow_random=true, type="technique/musical-combat", name = "musical combat", description = "Act in line with the melody of battle." }
+newTalentType{ allow_random=true, type="technique/battle-ballads", name = "battle ballads", description = "Bolster combat prowess." }
 newTalentType{ allow_random=true, type="technique/dirges", name = "dirges", description = "Debuff foes with dolorous dirges." }
+newTalentType{ allow_random=true, type="technique/rhapsodies", min_lev = 10, name = "rhapsodies", description = "Upbeat epics with a variety of different effects." }
 newTalentType{ allow_random=true, type="technique/performance-arts", name = "performance arts", generic = true, description = "The greater the audience, the better the performance!" }
 
 
@@ -120,4 +121,5 @@ techs_strdex_req5 = function(self, t) local stat = self:getStr() >= self:getDex(
 load("/data-minstrel/talents/techniques/musical-combat.lua")
 load("/data-minstrel/talents/techniques/performance-arts.lua")
 load("/data-minstrel/talents/techniques/dirges.lua")
+load("/data-minstrel/talents/techniques/rhapsodies.lua")
 load("/data-minstrel/talents/techniques/battle-ballads.lua")
