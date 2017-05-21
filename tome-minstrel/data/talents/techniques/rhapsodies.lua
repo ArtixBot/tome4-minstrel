@@ -18,7 +18,7 @@
 -- darkgod@te4.org
 
 newTalent{
-	name = "Opening Balladadd",
+	name = "Test1",
 	type = {"technique/rhapsodies", 1},
 	message = "@Source@ opens with a powerful ballad!",
 	require = techs_dex_req1,
@@ -77,7 +77,7 @@ newTalent{
 }
 
 newTalent{
-	name = "Arcane Staminaabd",
+	name = "Test2",
 	type = {"technique/rhapsodies", 2},
 	require = techs_req2,
 	no_energy = true,
@@ -123,7 +123,7 @@ newTalent{
 }
 
 newTalent{
-	name = "Arcane Armorabd",
+	name = "Test3",
 	type = {"technique/rhapsodies", 3},
 	require = techs_req3,
 	mode = "sustained",
@@ -165,7 +165,7 @@ newTalent{
 }
 
 newTalent{
-	name = "Martial Magicbda", -- no cost; it's main purpose is to give the player an alternative means of using mana/stamina based talents
+	name = "Test4", -- no cost; it's main purpose is to give the player an alternative means of using mana/stamina based talents
 	type = {"technique/rhapsodies", 4},
 	require = techs_req4,
 	points = 5,

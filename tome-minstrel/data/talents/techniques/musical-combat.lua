@@ -125,45 +125,49 @@ newTalent{
 }
 
 newTalent{
-	-- High-damage strike that disarms and stuns.
+	--High-damage attack that may disarm and confuse.
+	--STATUS: Implemented, working! Need to see if enemies can save against it, though.
 	name = "Cadenza",
 	type = {"technique/musical-combat", 3},
 	require = techs_req3,
-	mode = "sustained",
-	sustain_mana = 30,
-	no_energy = true,
-	cooldown = 5,
 	points = 5,
-	tactical = { BUFF = 2 },
-	getDamageReduction = function(self,t) return self:combatTalentSpellDamage(t, 2, 40) end,
-	getManaRatio = function(self,t) return 0.05 + self:combatTalentLimit(t, 1, 0.01, 0.05) end,  --Limit less than 1.0 ratio
-	activate = function(self, t)
-		local power = self:getTalentLevel(t) * 2.5
-		return {
-			fatigue = self:addTemporaryValue("fatigue", -power),
-		}
-	end,
-	deactivate = function(self, t, p)
-		self:removeTemporaryValue("fatigue",p.fatigue)
+	cooldown = 12,
+	stamina = 18,
+	requires_target = true,
+	is_melee = true,
+	target = function(self, t) return {type="hit", range=self:getTalentRange(t)} end,
+	getDuration = function(self, t) return math.floor(self:combatTalentScale(t, 3, 5)) end,
+	action = function(self, t)
+		local tg = self:getTalentTarget(t)
+		local x, y, target = self:getTarget(tg)
+		if not target or not self:canProject(tg, x, y) then return nil end
+		local hit = self:attackTarget(target, nil, self:combatTalentWeaponDamage(t, 1.26, 1.61), true)
+
+		-- Attempts to disarm.
+		if hit then
+			if target:canBe("disarmed") then
+				target:setEffect(target.EFF_DISARMED, t.getDuration(self, t), {apply_power=self:combatPhysicalpower()})
+			else
+				game.logSeen(target, "%s is not disarmed!", target.name:capitalize())
+			end
+		end
+		
+		-- Attempts to confuse.
+		if hit then
+			if target:canBe("confused") then
+				target:setEffect(target.EFF_CONFUSED, t.getDuration(self, t), {power=25})
+			else
+				game.logSeen(target, "%s resisted the confusion!", target.name:capitalize())
+			end
+		end
+
 		return true
 	end,
-	callbackOnTakeDamage = function(self, t, src, x, y, type, dam, state)
-	    if self:knowTalent(self.T_ARCANE_ARMOR) and self:isTalentActive(self.T_ARCANE_ARMOR) then
-		    if dam <= t.getDamageReduction(self,t)  then
-		        self:incMana(dam*t.getManaRatio(self,t))
-			    dam = 0
-		    else
-		        self:incMana(t.getDamageReduction(self,t)*t.getManaRatio(self,t))
-		    	dam = dam - t.getDamageReduction(self,t)
-		    end
-		end
-        return {dam=dam}
-	end,
-
 	info = function(self, t)
-		local power = self:getTalentLevel(t) * 2.5
-		return ([[Enchants the user's armor, making it lighter and capable of absorbing damage and converting it to mana.  Reduces fatigue by %d%% and reduces all sources of damage by %d. Restores %d%% of the damage absorbed as mana.
-		Turning this talent on does not take a turn.]]):format(power,t.getDamageReduction(self,t),t.getManaRatio(self,t)*100)
+		return ([[Perform a sudden, violent strike that deals %d%% damage.
+		The unexpected power of this attack may disarm and confuse (25%% strength) hit targets for %d turns.
+		Your chance to disarm and confuse the target improves with Physical Power.]]):
+		format(100 * self:combatTalentWeaponDamage(t, 1.26, 1.61), t.getDuration(self, t))
 	end,
 }
 

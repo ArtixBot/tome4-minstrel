@@ -21,7 +21,7 @@
 newTalentType{ allow_random=true, type="technique/musical-combat", name = "musical combat", description = "Act in line with the melody of battle." }
 newTalentType{ allow_random=true, type="technique/battle-ballads", name = "battle ballads", description = "Bolster combat prowess." }
 newTalentType{ allow_random=true, type="technique/dirges", name = "dirges", description = "Debuff foes with dolorous dirges." }
-newTalentType{ allow_random=true, type="technique/rhapsodies", min_lev = 10, name = "rhapsodies", description = "Upbeat epics with a variety of different effects." }
+newTalentType{ allow_random=true, type="technique/rhapsodies", min_lev = 10, name = "epics", description = "Upbeat epics with a variety of different effects." }
 newTalentType{ allow_random=true, type="technique/performance-arts", name = "performance arts", generic = true, description = "The greater the audience, the better the performance!" }
 
 

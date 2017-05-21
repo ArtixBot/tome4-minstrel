@@ -19,6 +19,7 @@
 
 newTalent{
 	--Provides bonuses as more enemies enter a specified area around the user.
+	--STATUS: NOT FINISHED
 	name = "Expectations of the Audience",
 	type = {"technique/performance-arts", 1},
 	points = 5,
@@ -61,61 +62,40 @@ newTalent{
 		local p = self:isTalentActive(t.id)
 		local cur = 0
 		if p then cur = math.min(p.nb_foes, t.getMax(self, t)) * 20 end
-		return ([[The thrill of the hunt invigorates you. For each foe in radius %d around you, you gain 20%% movement speed (up to %d%%).
+		return ([[No performance is complete without an audience!
+		For each foe in radius %d around you, you gain 20%% movement speed (up to %d%%).
 		Current bonus: %d%%.]])
 		:format(self:getTalentRadius(t), t.getMax(self, t) * 20, cur)
 	end,
 }
 
 newTalent{
-	--Increases mental save score and increases resistance to silence effects.
+	--Increases silence and confusion immunity, and confers bonus mental save.
+	--STATUS: IMPLEMENTED AND WORKING. Needs better flavor text.
 	name = "Verbosity",
 	type = {"technique/performance-arts", 2},
-	require = techs_req2,
-	no_energy = true,
-	sustain_mana = 20,
-	mode = "sustained",
-	tactical = { BUFF = 2, Stamina = 1 },
+	require = techs_dex_req2,
 	points = 5,
-	cooldown = 5,
-	getStaminaMultiplier = function(self,t) return self:combatTalentScale(t, 0.1, 0.5, 0.75) end,
-	get_stamina_regen = function(self,t)
-		local sustain_count = 0
-
-		for tid, act in pairs(self.sustain_talents) do
-			sustain_count = sustain_count + 1
-		end
-		return (sustain_count * t.getStaminaMultiplier(self,t))
-	end,
-	activate = function(self, t)
-		local sustain_count = 1
-
-		for tid, act in pairs(self.sustain_talents) do
-			sustain_count = sustain_count + 1
-		end
-		self.stamina_regen = self.stamina_regen + (sustain_count  * t.getStaminaMultiplier(self,t))
-		return {
-			stam = self:addTemporaryValue("arcane_stamina_mult", t.getStaminaMultiplier(self,t))
-		}
-	end,
-	deactivate = function(self, t, p)
-		local sustain_count = 0
-
-		for tid, act in pairs(self.sustain_talents) do
-			sustain_count = sustain_count + 1
-		end
-		self.stamina_regen = self.stamina_regen - (sustain_count * self:attr("arcane_stamina_mult"))
-		self:removeTemporaryValue("arcane_stamina_mult", p.stam)
-		return true
+	mode = "passive",
+	getSImmune = function(self, t) return self:combatTalentLimit(t, 5, 0.2, 0.81) end,
+	getCImmune = function(self, t) return self:combatTalentLimit(t, 1, 0.15, 0.35) end,
+	getSave = function(self, t) return self:combatTalentScale(t, 12, 36, 0.75) end,
+	passives = function(self, t, p)
+		self:talentTemporaryValue(p, "silence_immune", t.getSImmune(self, t))
+		self:talentTemporaryValue(p, "confusion_immune", t.getCImmune(self, t))
+		self:talentTemporaryValue(p, "combat_mentalresist", t.getSave(self, t))
 	end,
 	info = function(self, t)
-		return ([[The user magically taps into their sustained powers, siphoning off a portion of the energy to restore the user's stamina.
-		Increases stamina regen by %0.2f per active sustain. Turning this talent on does not take a turn.]]):format(t.getStaminaMultiplier(self,t))
+		return ([[A minstrel's job is surprisingly difficult, given the mental fortitude needed to learn and remember new songs.
+		Years of singing and reciting verse have strengthened your mind and hardened your voice against external threats seeking to silence you.
+		Increases silence immunity by %d%% and confusion immunity by %d%%. Also confers +%d additional mental save.]]):
+		format(t.getSImmune(self, t) * 100, t.getCImmune(self, t) * 100, t.getSave(self, t))
 	end,
 }
 
 newTalent{
 	--Resets the cooldown of music-specific talents currently on cooldown.
+	--STATUS: NOT FINISHED
 	name = "Moxie",
 	type = {"technique/performance-arts", 3},
 	require = techs_req3,
@@ -159,7 +139,8 @@ newTalent{
 
 newTalent{
 	--Melee attack which cannot miss, is a critical hit, and has massive armor pentration. High cooldown.
-	name = "Encore", -- no cost; it's main purpose is to give the player an alternative means of using mana/stamina based talents
+	--STATUS: NOT FINISHED
+	name = "Encore",
 	type = {"technique/performance-arts", 4},
 	require = techs_req4,
 	points = 5,

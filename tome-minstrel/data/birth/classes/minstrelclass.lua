@@ -31,11 +31,11 @@ newBirthDescriptor{
 		"Their most important stats are: Cunning, Willpower, and Dexterity",
 		"#GOLD#Stat modifiers:",
 		"#LIGHT_BLUE# * +0 Strength, +2 Dexterity, +0 Constitution",
-		"#LIGHT_BLUE# * +0 Magic, +4 Willpower, +4 Cunning",
+		"#LIGHT_BLUE# * +0 Magic, +3 Willpower, +3 Cunning",
 		"#GOLD#Life per level:#LIGHT_BLUE# -1"
 	},
 	power_source = {technique=true},
-	stats = { dex=1, wil=4, cun=4 },
+	stats = { dex=2, wil=3, cun=3 },
 	talents_types = {
 		-- Class Skills
 		["technique/duelist"]={true, 0.3},
@@ -53,6 +53,7 @@ newBirthDescriptor{
 	},
 	talents = {
 		[ActorTalents.T_KNIFE_MASTERY] = 1,
+		[ActorTalents.T_WEAPON_COMBAT] = 1,
 	},
 	copy = {
 		max_life = 100,
