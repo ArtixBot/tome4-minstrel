@@ -18,20 +18,22 @@
 -- darkgod@te4.org
 
 newTalent{
-	-- Charge manuever which buffs user speed for a short period of time
-	name = "Opening Ballad",
+	-- Charge manuever which buffs user speed for a short period of time.
+	-- STATUS: Implemented, working!. Todo: set so opening sweep only works when a target is selected (instead of allowing dash to tile)
+	name = "Opening Sweep",
 	type = {"technique/musical-combat", 1},
-	message = "@Source@ opens with a powerful ballad!",
+	message = "@Source@ dashes with alarming speed!",
 	require = techs_dex_req1,
 	points = 5,
 	random_ego = "attack",
 	stamina = 22,
-	cooldown = function(self, t) return math.ceil(self:combatTalentLimit(t, 0, 8, 4)) end, --Limit to >0
-	tactical = { ATTACK = { weapon = 1, stun = 1 }, CLOSEIN = 3 },
+	cooldown = function(self, t) return math.ceil(self:combatTalentLimit(t, 0, 6, 4)) end,
+	tactical = { ATTACK = { weapon = 1}, CLOSEIN = 3 },
 	requires_target = true,
 	is_melee = true,
+	getSpeed = function(self, t) return self:combatTalentLimit(t, 1, 0.10, 0.28) end,
 	target = function(self, t) return {type="bolt", range=self:getTalentRange(t), nolock=true, nowarning=true, requires_knowledge=false, stop__block=true} end,
-	range = function(self, t) return math.floor(self:combatTalentScale(t, 2, 6)) end,
+	range = function(self, t) return math.floor(self:combatTalentScale(t, 3, 5)) end,
 	on_pre_use = function(self, t)
 		if self:attr("never_move") then return false end
 		return true
@@ -60,20 +62,22 @@ newTalent{
 			self:resetMoveAnim()
 			self:setMoveAnim(ox, oy, 8, 5)
 		end
-		-- Attack ?
+		
+		-- Performs actual attack.
 		if target and core.fov.distance(self.x, self.y, target.x, target.y) <= 1 then
-			if self:attackTarget(target, nil, 1.5, true) and target:canBe("stun") then
-				-- On hit, disarms target.
-				target:setEffect(target.DISARMED, 3, {})
+		
+			if self:attackTarget(target, nil, 1.25, true) then
+				-- On hit, boosts global speed for a short period of time.
+				self:setEffect(self.EFF_SPEED, 2, {power=t.getSpeed(self, t)})
 			end
 		end
 
 		return true
 	end,
 	info = function(self, t)
-		return ([[Open with a sudden strike, inflicting 150% weapon damage.
-		Hit targets are disarmed for 3 turns.
-		Because of the momentum required to execute this manuever, the target must be at least 2 tiles away.]])
+		return ([[Dash to a target tile with blinding speed.
+		Targeting an enemy with this ability will deliver a strike that deals 125%% weapon damage. A successful hit conserves your momentum, temporarily granting +%d%% global speed for 2 turns.
+		To build up momentum, the target tile must be at least 2 tiles away from the user.]]):format(100*t.getSpeed(self, t))
 	end,
 }
 
