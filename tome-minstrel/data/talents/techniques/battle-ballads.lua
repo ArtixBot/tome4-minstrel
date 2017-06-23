@@ -18,62 +18,38 @@
 -- darkgod@te4.org
 
 newTalent{
-	-- Increases all vital stats by a small amount. Augmented by the next three skills.
 	name = "Symphony of Superiority",
 	type = {"technique/battle-ballads", 1},
-	message = "@Source@ opens with a powerful ballad!",
-	require = techs_dex_req1,
+	require = techs_req1,
 	points = 5,
-	random_ego = "attack",
-	stamina = 22,
-	cooldown = function(self, t) return math.ceil(self:combatTalentLimit(t, 0, 8, 4)) end, --Limit to >0
-	tactical = { ATTACK = { weapon = 1, stun = 1 }, CLOSEIN = 3 },
-	requires_target = true,
-	is_melee = true,
-	target = function(self, t) return {type="bolt", range=self:getTalentRange(t), nolock=true, nowarning=true, requires_knowledge=false, stop__block=true} end,
-	range = function(self, t) return math.floor(self:combatTalentScale(t, 2, 6)) end,
-	on_pre_use = function(self, t)
-		if self:attr("never_move") then return false end
-		return true
+	mode = "sustained",
+	cooldown = 10,
+	sustain_stamina = 40,
+	tactical = { BUFF = 2 },
+	getStatIncrease = function(self, t) return math.floor(self:combatTalentSpellDamage(t, 2, 10)) end,
+	activate = function(self, t)
+		game:playSoundNear(self, "talents/spell_generic")
+		local power = t.getStatIncrease(self, t)
+		return {
+			stats = self:addTemporaryValue("inc_stats", {
+				[self.STAT_STR] = power,
+				[self.STAT_DEX] = power,
+				[self.STAT_MAG] = power,
+				[self.STAT_WIL] = power,
+				[self.STAT_CUN] = power,
+				[self.STAT_CON] = power,
+			}),
+		}
 	end,
-	action = function(self, t)
-		local tg = self:getTalentTarget(t)
-		local x, y, target = self:getTarget(tg)
-		if not self:canProject(tg, x, y) then return nil end
-		local block_actor = function(_, bx, by) return game.level.map:checkEntity(bx, by, Map.TERRAIN, "block_move", self) end
-		local linestep = self:lineFOV(x, y, block_actor)
-
-		local tx, ty, lx, ly, is_corner_blocked
-		repeat  -- make sure each tile is passable
-			tx, ty = lx, ly
-			lx, ly, is_corner_blocked = linestep:step()
-		until is_corner_blocked or not lx or not ly or game.level.map:checkAllEntities(lx, ly, "block_move", self)
-		if not tx or core.fov.distance(self.x, self.y, tx, ty) < 1 then
-			game.logPlayer(self, "Target enemy is too close to strike!")
-			return
-		end
-		if not tx or not ty or core.fov.distance(x, y, tx, ty) > 1 then return nil end
-
-		local ox, oy = self.x, self.y
-		self:move(tx, ty, true)
-		if config.settings.tome.smooth_move > 0 then
-			self:resetMoveAnim()
-			self:setMoveAnim(ox, oy, 8, 5)
-		end
-		-- Attack ?
-		if target and core.fov.distance(self.x, self.y, target.x, target.y) <= 1 then
-			if self:attackTarget(target, nil, 1.5, true) and target:canBe("stun") then
-				-- On hit, disarms target.
-				target:setEffect(target.DISARMED, 3, {})
-			end
-		end
-
+	deactivate = function(self, t, p)
+		self:removeTemporaryValue("inc_stats", p.stats)
 		return true
 	end,
 	info = function(self, t)
-		return ([[Open with a sudden strike, dealing 150% weapon damage to target unit.
-		Hit targets are disarmed for 3 turns.
-		Because of the momentum required to execute this manuever, the target must be at least 2 tiles away.]])
+		local statinc = t.getStatIncrease(self, t)
+		return ([[You concentrate on your inner self, increasing all your stats by %d.
+		The stat increase will improve with your Spellpower.]]):
+		format(statinc)
 	end,
 }
 

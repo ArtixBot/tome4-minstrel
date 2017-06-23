@@ -176,44 +176,29 @@ newTalent{
 }
 
 newTalent{
-	-- Incredibly powerful attack, but reduces user speed for a short period after usage.
+	--Incredibly powerful strike, but high cooldown and slows user.
+	--STATUS: Implemented, works without bugs! TODO: Prevent debuff from being purged by wild infusions, heat beams, etc.
 	name = "Finale",
 	type = {"technique/musical-combat", 4},
 	require = techs_req4,
 	points = 5,
-	cooldown = 24,
-	tactical = { MANA = 1, STAMINA = 1, BUFF = 1 },
-	getDuration = function(self, t) return math.floor(self:combatTalentLimit(t, 24, 3, 7)) end, -- Limit < 24
-	no_energy = true,
+	cooldown = 16,
+	stamina = 40,
+	requires_target = true,
+	is_melee = true,
+	target = function(self, t) return {type="hit", range=self:getTalentRange(t)} end,
 	action = function(self, t)
-		self:setEffect(self.EFF_MARTIAL_MAGIC, t.getDuration(self, t), {power = 10})
-		if self:getTalentLevel(t) >= 5 then
-			local effs = {}
-			-- Go through all spell effects
-			for eff_id, p in pairs(self.tmp) do
-				local e = self.tempeffect_def[eff_id]
-				if e.status == "detrimental" then
-					if e.subtype.silence then
-						effs[#effs+1] = {"effect", eff_id}
-					end
-				end
-			end
-			local nb = 10000
-			while #effs > 0 and nb > 0 do
-				local eff = rng.tableRemove(effs)
-				self:removeEffect(eff, silent, force)
-				nb = nb - 1
-				removed = removed + 1
-			end
-		end
+		local tg = self:getTalentTarget(t)
+		local x, y, target = self:getTarget(tg)
+		if not target or not self:canProject(tg, x, y) then return nil end
+		local hit = self:attackTarget(target, nil, self:combatTalentWeaponDamage(t, 4.00, 6.00), true)
+		self:setEffect(self.EFF_SLOW, 3, {power=0.35, apply_power=10000, type="other", no_ct_effect=true})
+		
 		return true
 	end,
 	info = function(self, t)
-		local duration = t.getDuration(self, t)
-		return ([[The user enters a mystical martial form for %0.2f turns which allows them to utilize their stamina as mana or their mana as stamina.  The user's mana and stamina sustains will not drop unless both their mana and stamina reach zero.
-		At 5 points, activating this talent will remove all silence effects currently affecting the user.
-		This talent will automatically trigger if the user's mana or stamina drops to zero as long as it is not cooling down.
-		Using this talent does not take a turn.]]):
-		format(duration)
+		return ([[Finish off your opponent with a singular strike, inflicting %d%% weapon damage.
+		Beware; the sheer power of this attack will temporarily leave you exhausted, slowing down your global speed by 35%% for the next 3 turns. This slow ignores saves (and cannot be reduced by physical save), but can be purged via infusions and other abilities.]]):
+		format(100 * self:combatTalentWeaponDamage(t, 4.00, 6.00))
 	end,
 }
