@@ -82,49 +82,43 @@ newTalent{
 }
 
 newTalent{
-	-- Inflicts confusion and reduces accuracy of all enemies in an area around the user.
 	name = "Solo",
 	type = {"technique/musical-combat", 2},
 	require = techs_req2,
-	no_energy = true,
-	sustain_mana = 20,
-	mode = "sustained",
-	tactical = { BUFF = 2, Stamina = 1 },
 	points = 5,
-	cooldown = 5,
-	getStaminaMultiplier = function(self,t) return self:combatTalentScale(t, 0.1, 0.5, 0.75) end,
-	get_stamina_regen = function(self,t)
-		local sustain_count = 0
-
-		for tid, act in pairs(self.sustain_talents) do
-			sustain_count = sustain_count + 1
-		end
-		return (sustain_count * t.getStaminaMultiplier(self,t))
+	stamina = 30,
+	cooldown = 18,
+	tactical = { ATTACKAREA = { confusion = 1 }, DISABLE = { confusion = 3 } },
+	range = 0,
+	radius = function(self, t) return math.floor(self:combatTalentScale(t, 4, 8)) end,
+	getDuration = function(self, t) return math.floor(self:combatTalentScale(t, 4, 8)) end,
+	getAccDebuff = function(self, t) return math.floor(self:combatTalentScale(t, 10, 50)) end,
+	getSpdBuff = function(self, t) return math.floor(self:combatTalentScale(t, 0.05, 0.10)) end,
+	requires_target = true,
+	target = function(self, t)
+		return {type="cone", range=self:getTalentRange(t), radius=self:getTalentRadius(t), selffire=false}
 	end,
-	activate = function(self, t)
-		local sustain_count = 1
+	on_pre_use = function(self, t, silent) if not self:hasTwoHandedWeapon() then if not silent then game.logPlayer(self, "You require a two handed weapon to use this talent.") end return false end return true end,
+	action = function(self, t)
+		local weapon = self:hasTwoHandedWeapon()
+		if not weapon then return nil end
 
-		for tid, act in pairs(self.sustain_talents) do
-			sustain_count = sustain_count + 1
-		end
-		self.stamina_regen = self.stamina_regen + (sustain_count  * t.getStaminaMultiplier(self,t))
-		return {
-			stam = self:addTemporaryValue("arcane_stamina_mult", t.getStaminaMultiplier(self,t))
-		}
-	end,
-	deactivate = function(self, t, p)
-		local sustain_count = 0
-
-		for tid, act in pairs(self.sustain_talents) do
-			sustain_count = sustain_count + 1
-		end
-		self.stamina_regen = self.stamina_regen - (sustain_count * self:attr("arcane_stamina_mult"))
-		self:removeTemporaryValue("arcane_stamina_mult", p.stam)
+		local tg = self:getTalentTarget(t)
+		local x, y = self:getTarget(tg)
+		if not x or not y then return nil end
+		self:project(tg, x, y, DamageType.CONFUSION, {
+			dur=t.getDuration(self, t),
+			dam=50+self:getTalentLevelRaw(t)*10,
+			power_check=function() return self:combatPhysicalpower() end,
+			resist_check=self.combatPhysicalResist,
+		})
+		game.level.map:particleEmitter(self.x, self.y, tg.radius, "directional_shout", {life=8, size=3, tx=x-self.x, ty=y-self.y, distorion_factor=0.1, radius=self:getTalentRadius(t), nb_circles=8, rm=0.8, rM=1, gm=0.4, gM=0.6, bm=0.1, bM=0.2, am=1, aM=1})
+		if core.shader.allow("distort") then game.level.map:particleEmitter(self.x, self.y, tg.radius, "gravity_breath", {life=8, radius=tg.radius, tx=x-self.x, ty=y-self.y, allow=true}) end
 		return true
 	end,
 	info = function(self, t)
-		return ([[The user magically taps into their sustained powers, siphoning off a portion of the energy to restore the user's stamina.
-		Increases stamina regen by %0.2f per active sustain. Turning this talent on does not take a turn.]]):format(t.getStaminaMultiplier(self,t))
+		return ([[Shout your warcry in a frontal cone of radius %d. Any targets caught inside will be confused for %d turns.]]):
+		format(self:getTalentRadius(t), t.getDuration(self, t))
 	end,
 }
 

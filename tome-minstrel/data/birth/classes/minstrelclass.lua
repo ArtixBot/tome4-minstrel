@@ -42,7 +42,7 @@ newBirthDescriptor{
 		["technique/musical-combat"]={true, 0.3},
 		["technique/battle-ballads"]={true, 0.3},
 		["technique/dirges"]={true, 0.3},
-		["technique/rhapsodies"]={false, 0.3},
+		["technique/luck-of-the-draw"]={false, 0.3},
 		["cunning/artifice"]={false, 0.3},
 		
 		-- Generic Skills
