@@ -165,12 +165,12 @@ newTalent{
 
 newTalent{
 	--Incredibly powerful strike, but high cooldown and slows user.
-	--STATUS: Implemented, works without bugs! TODO: Prevent debuff from being purged by wild infusions, heat beams, etc.
+	--STATUS: Fully implemented! Slow seems to apply at -24.9% instead of -35% as intended, though.
 	name = "Finale",
 	type = {"technique/musical-combat", 4},
 	require = techs_req4,
 	points = 5,
-	cooldown = 16,
+	cooldown = 20,
 	stamina = 40,
 	requires_target = true,
 	is_melee = true,
@@ -180,13 +180,14 @@ newTalent{
 		local x, y, target = self:getTarget(tg)
 		if not target or not self:canProject(tg, x, y) then return nil end
 		local hit = self:attackTarget(target, nil, self:combatTalentWeaponDamage(t, 4.00, 6.00), true)
-		self:setEffect(self.EFF_SLOW, 3, {power=0.35, apply_power=10000, type="other", no_ct_effect=true})
+		self:setEffect(self.EFF_FINALE_DEBUFF, 3, {power=0.35, apply_power=10000, no_ct_effect=true})
 		
 		return true
 	end,
 	info = function(self, t)
 		return ([[Finish off your opponent with a singular strike, inflicting %d%% weapon damage.
-		Beware; the sheer power of this attack will temporarily leave you exhausted, slowing down your global speed by 35%% for the next 3 turns. This slow ignores saves (and cannot be reduced by physical save), but can be purged via infusions and other abilities.]]):
+		Beware; the sheer power of this attack will temporarily leave you exhausted, slowing down your global speed by 35%% for the next 3 turns.
+		This slow CANNOT be resisted or purged in any way.]]):
 		format(100 * self:combatTalentWeaponDamage(t, 4.00, 6.00))
 	end,
 }
