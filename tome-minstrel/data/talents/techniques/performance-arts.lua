@@ -17,6 +17,12 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
+-- Overall completion: 25%
+	-- Expectations of the Audience: 0%
+	-- Verbosity: 100% (maybe update flavor text)
+	-- Moxie: 0%
+	-- Encore: 0%
+
 newTalent{
 	--Provides bonuses as more enemies enter a specified area around the user.
 	--STATUS: NOT FINISHED
@@ -71,7 +77,6 @@ newTalent{
 
 newTalent{
 	--Increases silence and confusion immunity, and confers bonus mental save.
-	--STATUS: IMPLEMENTED AND WORKING. Needs better flavor text.
 	name = "Verbosity",
 	type = {"technique/performance-arts", 2},
 	require = techs_dex_req2,

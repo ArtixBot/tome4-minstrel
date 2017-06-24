@@ -17,6 +17,15 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
+-- Overall completion: 85%
+	-- Opening Sweep: 80%
+		-- TODO: Disable ability to dash to any tile so long as it is unoccupied.
+	-- Solo: 50%
+		-- TODO: Implement global +spd buff per enemy hit by Solo.
+	-- Cadenza: 95%
+		-- TODO: Check to see if enemies can save against this ability (they should be able to).
+	-- Finale: 100%
+
 newTalent{
 	-- Charge manuever which buffs user speed for a short period of time.
 	-- STATUS: Implemented, working!. Todo: set so opening sweep only works when a target is selected (instead of allowing dash to tile)
@@ -111,7 +120,7 @@ newTalent{
 		return true
 	end,
 	info = function(self, t)
-		return ([[Your battle cry shatters the will of your foes within a radius of %d, lowering their Accuracy by %d for %d turns, making them easier to hit.]]):
+		return ([[A shattering solo disrupts the focus of your foes within a conal area (radius of %d). All enemies hit have their Accuracy lowered by %d for %d turns.]]):
 		format(self:getTalentRadius(t), 7 * self:getTalentLevel(t), t.getDuration(self, t))
 	end,
 }
@@ -165,7 +174,6 @@ newTalent{
 
 newTalent{
 	--Incredibly powerful strike, but high cooldown and slows user.
-	--STATUS: Fully implemented! Slow seems to apply at -24.9% instead of -35% as intended, though.
 	name = "Finale",
 	type = {"technique/musical-combat", 4},
 	require = techs_req4,
@@ -180,13 +188,13 @@ newTalent{
 		local x, y, target = self:getTarget(tg)
 		if not target or not self:canProject(tg, x, y) then return nil end
 		local hit = self:attackTarget(target, nil, self:combatTalentWeaponDamage(t, 4.00, 6.00), true)
-		self:setEffect(self.EFF_FINALE_DEBUFF, 3, {power=0.35, apply_power=10000, no_ct_effect=true})
+		self:setEffect(self.EFF_FINALE_DEBUFF, 4, {power=0.35, apply_power=10000, no_ct_effect=true})
 		
 		return true
 	end,
 	info = function(self, t)
 		return ([[Finish off your opponent with a singular strike, inflicting %d%% weapon damage.
-		Beware; the sheer power of this attack will temporarily leave you exhausted, slowing down your global speed by 35%% for the next 3 turns.
+		Beware; the sheer power of this attack will temporarily leave you exhausted, slowing down your global speed by 25%% for the next 4 turns.
 		This slow CANNOT be resisted or purged in any way.]]):
 		format(100 * self:combatTalentWeaponDamage(t, 4.00, 6.00))
 	end,

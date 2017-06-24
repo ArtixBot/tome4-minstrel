@@ -27,7 +27,7 @@ local Level = require "engine.Level"
 newEffect{
 	name = "FINALE_DEBUFF", image = "talents/finale.png",
 	desc = "Exhausted",
-	long_desc = function(self, eff) return ("Exhausted from performing a Finale! Global action speed reduced by %d%%."):format(eff.power * 100) end,
+	long_desc = function(self, eff) return ("Exhausted from performing a Finale! Global action speed reduced by 25%.") end,
 	type = "other",
 	subtype = { slow=true },
 	status = "detrimental",
