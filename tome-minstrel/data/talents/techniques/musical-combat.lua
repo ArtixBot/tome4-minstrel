@@ -22,13 +22,12 @@
 		-- TODO: Disable ability to dash to any tile so long as it is unoccupied.
 	-- Solo: 50%
 		-- TODO: Implement global +spd buff per enemy hit by Solo.
-	-- Cadenza: 95%
-		-- TODO: Check to see if enemies can save against this ability (they should be able to).
+	-- Cadenza: 100%
 	-- Finale: 100%
 
 newTalent{
 	-- Charge manuever which buffs user speed for a short period of time.
-	-- STATUS: Implemented, working!. Todo: set so opening sweep only works when a target is selected (instead of allowing dash to tile)
+	-- STATUS: Implemented, working! Todo: set so opening sweep only works when a target is selected (instead of allowing dash to tile)
 	name = "Opening Sweep",
 	type = {"technique/musical-combat", 1},
 	message = "@Source@ dashes with alarming speed!",
@@ -127,7 +126,6 @@ newTalent{
 
 newTalent{
 	--High-damage attack that may disarm and confuse.
-	--STATUS: Implemented, working! Need to see if enemies can save against it, though.
 	name = "Cadenza",
 	type = {"technique/musical-combat", 3},
 	require = techs_req3,

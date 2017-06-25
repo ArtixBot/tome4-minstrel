@@ -47,7 +47,7 @@ newBirthDescriptor{
 		
 		-- Generic Skills
 		["technique/combat-training"]={true, 0.3},
-		["technique/performance-arts"]={true, 0.3},
+		["technique/performance-arts"]={true, 0},
 		["technique/mobility"]={true, 0.3},
 		["cunning/survival"]={false, 0.3},
 	},

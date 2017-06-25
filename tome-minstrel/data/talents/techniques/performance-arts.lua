@@ -17,16 +17,16 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
--- Overall completion: 25%
-	-- Expectations of the Audience: 0%
-	-- Verbosity: 100% (maybe update flavor text)
-	-- Moxie: 0%
+-- Overall completion: 40%
+	-- Showtime!: 0%
+	-- Verbosity: 100%
+	-- Moxie: 85% (add additional buffs, possibly +mindpower or +cun for a short period after ability usage)
 	-- Encore: 0%
 
 newTalent{
 	--Provides bonuses as more enemies enter a specified area around the user.
 	--STATUS: NOT FINISHED
-	name = "Expectations of the Audience",
+	name = "Showtime!",
 	type = {"technique/performance-arts", 1},
 	points = 5,
 	require = techs_dex_req1,
@@ -99,46 +99,43 @@ newTalent{
 }
 
 newTalent{
-	--Resets the cooldown of music-specific talents currently on cooldown.
-	--STATUS: NOT FINISHED
+	-- Resets the cooldown of a random amount of techniques.
+	-- TODO: Add temporary buff (either +mindpower, +cun, or +phypower) for short period after skill usage, or make this skill instant.
 	name = "Moxie",
 	type = {"technique/performance-arts", 3},
-	require = techs_req3,
-	mode = "sustained",
-	sustain_mana = 30,
-	no_energy = true,
-	cooldown = 5,
+	require = techs_dex_req3,
 	points = 5,
+	stamina = 20,
+	cooldown = 50,
 	tactical = { BUFF = 2 },
-	getDamageReduction = function(self,t) return self:combatTalentSpellDamage(t, 2, 40) end,
-	getManaRatio = function(self,t) return 0.05 + self:combatTalentLimit(t, 1, 0.01, 0.05) end,  --Limit less than 1.0 ratio
-	activate = function(self, t)
-		local power = self:getTalentLevel(t) * 2.5
-		return {
-			fatigue = self:addTemporaryValue("fatigue", -power),
-		}
-	end,
-	deactivate = function(self, t, p)
-		self:removeTemporaryValue("fatigue",p.fatigue)
+	fixed_cooldown = true,
+	getTalentCount = function(self, t) return math.floor(self:combatTalentScale(t, 1, 5, "log")) end,
+	getMaxLevel = function(self, t) return self:getTalentLevel(t) end,
+	action = function(self, t)
+		local nb = t.getTalentCount(self, t)
+		local maxlev = t.getMaxLevel(self, t)
+		local tids = {}
+		for tid, _ in pairs(self.talents_cd) do
+			local tt = self:getTalentFromId(tid)
+			if not tt.fixed_cooldown then
+				if tt.type[2] <= maxlev and tt.type[1]:find("^technique/") then
+					tids[#tids+1] = tid
+				end
+			end
+		end
+		for i = 1, nb do
+			if #tids == 0 then break end
+			local tid = rng.tableRemove(tids)
+			self.talents_cd[tid] = nil
+		end
+		self.changed = true
+		game:playSoundNear(self, "talents/spell_generic2")
 		return true
 	end,
-	callbackOnTakeDamage = function(self, t, src, x, y, type, dam, state)
-	    if self:knowTalent(self.T_ARCANE_ARMOR) and self:isTalentActive(self.T_ARCANE_ARMOR) then
-		    if dam <= t.getDamageReduction(self,t)  then
-		        self:incMana(dam*t.getManaRatio(self,t))
-			    dam = 0
-		    else
-		        self:incMana(t.getDamageReduction(self,t)*t.getManaRatio(self,t))
-		    	dam = dam - t.getDamageReduction(self,t)
-		    end
-		end
-        return {dam=dam}
-	end,
-
 	info = function(self, t)
-		local power = self:getTalentLevel(t) * 2.5
-		return ([[Enchants the user's armor, making it lighter and capable of absorbing damage and converting it to mana.  Reduces fatigue by %d%% and reduces all sources of damage by %d. Restores %d%% of the damage absorbed as mana.
-		Turning this talent on does not take a turn.]]):format(power,t.getDamageReduction(self,t),t.getManaRatio(self,t)*100)
+		return ([[Any minstrel worth their salt possesses the quick thinking needed for unorthodox solutions to abnormal problems.
+		Resets the cooldown of up to %d techniques of tier %d or less.]]):
+		format(t.getTalentCount(self, t), t.getMaxLevel(self, t))
 	end,
 }
 
