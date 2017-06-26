@@ -38,4 +38,3 @@ newEffect{
 		self:effectTemporaryValue(eff, "combat_atk", -eff.power)
 	end,
 }
-

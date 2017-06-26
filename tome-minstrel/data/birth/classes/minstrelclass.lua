@@ -59,10 +59,11 @@ newBirthDescriptor{
 		max_life = 100,
 		resolvers.equip{ id=true,
 			{type="weapon", subtype="dagger", name = "iron dagger", autoreq=true, ego_chance=-1000, ego_chance=-1000},
+			{type="weapon", subtype="dagger", name = "iron dagger", autoreq=true, ego_chance=-1000, ego_chance=-1000},
 			{type="armor", subtype="light", name="rough leather armour", autoreq=true, ego_chance=-1000, ego_chance=-1000},
 		},
 		resolvers.inventory{ id=true,
-			{type="weapon", subtype="dagger", name = "iron dagger", autoreq=true, ego_chance=-1000, ego_chance=-1000},
+			{type="jewelry", subtype="amulet", name = "shattered songstone", autoreq=true, ego_chance=-1000, ego_chance=-1000},	
 		},
 	},
 	copy_add = {

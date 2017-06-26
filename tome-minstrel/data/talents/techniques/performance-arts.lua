@@ -130,6 +130,7 @@ newTalent{
 		end
 		self.changed = true
 		game:playSoundNear(self, "talents/spell_generic2")
+		self:setEffect(self.EFF_SPEED, 2, {power=10000})
 		return true
 	end,
 	info = function(self, t)
