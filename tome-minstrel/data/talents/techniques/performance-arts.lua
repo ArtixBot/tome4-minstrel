@@ -17,10 +17,10 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
--- Overall completion: 40%
+-- Overall completion: 50%
 	-- Showtime!: 0%
 	-- Verbosity: 100%
-	-- Moxie: 85% (add additional buffs, possibly +mindpower or +cun for a short period after ability usage)
+	-- Moxie: 100%
 	-- Encore: 0%
 
 newTalent{
@@ -111,6 +111,9 @@ newTalent{
 	fixed_cooldown = true,
 	getTalentCount = function(self, t) return math.floor(self:combatTalentScale(t, 1, 5, "log")) end,
 	getMaxLevel = function(self, t) return self:getTalentLevel(t) end,
+	getBonusDef = function(self, t) return math.floor(self:combatTalentMindDamage(t, 12, 60)) end,
+	getBonusResist = function(self, t) return math.floor(self:combatTalentMindDamage(t, 10, 40)) end,
+	getDuration = function(self, t) return self:combatTalentScale(t, 6, 8) end,
 	action = function(self, t)
 		local nb = t.getTalentCount(self, t)
 		local maxlev = t.getMaxLevel(self, t)
@@ -130,13 +133,14 @@ newTalent{
 		end
 		self.changed = true
 		game:playSoundNear(self, "talents/spell_generic2")
-		self:setEffect(self.EFF_SPEED, 2, {power=10000})
+		self:setEffect(self.EFF_MOXIE_BUFF, t.getDuration(self, t), {power=t.getBonusDef(self, t), res=t.getBonusResist(self, t)})
 		return true
 	end,
 	info = function(self, t)
 		return ([[Any minstrel worth their salt possesses the quick thinking needed for unorthodox solutions to abnormal problems.
-		Resets the cooldown of up to %d techniques of tier %d or less.]]):
-		format(t.getTalentCount(self, t), t.getMaxLevel(self, t))
+		Resets the cooldown of up to %d techniques of tier %d or less, and confers +%d additional defense and %d%% additional resistance to all damage for %d rounds.
+		The defense and resistance bonuses will increase with your Mindpower.]]):
+		format(t.getTalentCount(self, t), t.getMaxLevel(self, t), t.getBonusDef(self, t), t.getBonusResist(self, t), t.getDuration(self, t))
 	end,
 }
 
