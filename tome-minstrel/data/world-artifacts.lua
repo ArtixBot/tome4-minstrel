@@ -35,8 +35,8 @@ newEntity{ base = "BASE_AMULET",
 	unided_name = "shattered gray amulet",
 	desc = [[Though seemingly broken beyond repair, this amulet still possesses remnants of its original power.]],
 	level_range = {1, 5},
-	rarity = 200,
-	cost = 90,
+	rarity = 20,
+	cost = 50,
 	material_level = 1,
 	wielder = {
 		inc_stats = { [Stats.STAT_CUN] = 1 },
@@ -44,4 +44,29 @@ newEntity{ base = "BASE_AMULET",
 			["technique/performance-arts"] = 0.1,
 		},
 	},
+}
+
+newEntity{ base = "BASE_TOOL_MISC",
+	power_source = {technique=true},
+	unique = true,
+	name = "Dismas's Shameful Locket",		-- Totally not inspired by Darkest Dungeon's Crimson Court expansion.
+	color = colors.GRAY, image = "object/artifact/shield_unsetting_sun.png",
+	unided_name = "weathered locket",
+	desc = [[A weathered locket held by the infamous highwayman Dismas, who fell into despair upon taking the life of an unnamed mother and child. As to why Dismas kept such a powerful reminder of his sins, one can only assume he sought some form of redemption.
+	
+"A reflex - I didn't mean to..."]],
+	level_range = {28, 40},
+	rarity = 200,
+	cost = 350,
+	material_level = 4,
+	wielder = {
+		inc_stats = {[Stats.STAT_DEX] = 5},
+		combat_atk=20,
+		combat_apr=20,
+		combat_physcrit=10,
+		combat_critical_power=20,
+		combat_mentalresist=-25,
+	},
+	max_power = 20, power_regen = 1,
+	use_talent = { id = Talents.T_PERFECT_STRIKE, level = 2, power = 20 },
 }

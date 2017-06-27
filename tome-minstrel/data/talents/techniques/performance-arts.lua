@@ -93,14 +93,13 @@ newTalent{
 	info = function(self, t)
 		return ([[A minstrel's job is surprisingly difficult, given the mental fortitude needed to learn and remember new songs.
 		Years of singing and reciting verse have strengthened your mind and hardened your voice against external threats seeking to silence you.
-		Increases silence immunity by %d%% and confusion immunity by %d%%. Also confers +%d additional mental save.]]):
+		Increases silence immunity by %d%% and confusion immunity by %d%%. Also confers +%d mental save.]]):
 		format(t.getSImmune(self, t) * 100, t.getCImmune(self, t) * 100, t.getSave(self, t))
 	end,
 }
 
 newTalent{
 	-- Resets the cooldown of a random amount of techniques.
-	-- TODO: Add temporary buff (either +mindpower, +cun, or +phypower) for short period after skill usage, or make this skill instant.
 	name = "Moxie",
 	type = {"technique/performance-arts", 3},
 	require = techs_dex_req3,
@@ -138,7 +137,7 @@ newTalent{
 	end,
 	info = function(self, t)
 		return ([[Any minstrel worth their salt possesses the quick thinking needed for unorthodox solutions to abnormal problems.
-		Resets the cooldown of up to %d techniques of tier %d or less, and confers +%d additional defense and %d%% additional resistance to all damage for %d rounds.
+		Resets the cooldown of up to %d techniques of tier %d or less, and confers +%d defense and %d%% additional resistance to all damage for %d rounds.
 		The defense and resistance bonuses will increase with your Mindpower.]]):
 		format(t.getTalentCount(self, t), t.getMaxLevel(self, t), t.getBonusDef(self, t), t.getBonusResist(self, t), t.getDuration(self, t))
 	end,
