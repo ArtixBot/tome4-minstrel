@@ -17,66 +17,56 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
--- Overall completion: 50%
-	-- Showtime!: 0%
+-- Overall completion: 100%
+	-- Showtime: 100%
 	-- Verbosity: 100%
 	-- Moxie: 100%
-	-- Encore: 0%
+	-- Encore: 100%
 
 newTalent{
-	--Provides bonuses as more enemies enter a specified area around the user.
-	--STATUS: NOT FINISHED
-	name = "Showtime!",
+	-- While active: +damage, crit%, max stamina, and grants blind-fight, but rapidly drains stamina.
+	name = "Showtime",
 	type = {"technique/performance-arts", 1},
+	require = techs_req1,
 	points = 5,
-	require = techs_dex_req1,
-	cooldown = 15,
 	mode = "sustained",
-	sustain_stamina = 20,
-	no_energy = true,
-	requires_target = true,
-	tactical = { ESCAPE=2, CLOSEIN=2 },
-	getMax = function(self, t) return math.floor(self:combatTalentScale(t, 3, 8)) end,
-	radius = function(self, t) return math.floor(self:combatTalentScale(t, 2, 10)) end,
-	callbackOnAct = function(self, t, p)
-		p = p or self:isTalentActive(t.id)
-		local nb_foes = 0
-		local act
-		local sqdist
-		local sqradius = self:getTalentRadius(t) ^ 2
-		for i = 1, #self.fov.actors_dist do
-			act = self.fov.actors_dist[i]
-			sqdist = self.fov.actors and self.fov.actors and self.fov.actors[act] and self.fov.actors[act].sqdist
-			if act and sqdist and self:reactionToward(act) < 0 and self:canSee(act) and sqdist <= sqradius then nb_foes = nb_foes + 1 end
-		end
-		if nb_foes ~= p.nb_foes then
-			if p.tmpid then self:removeTemporaryValue("movement_speed", p.tmpid) p.tmpid = nil end
-			if nb_foes > 0 then p.tmpid = self:addTemporaryValue("movement_speed", math.min(nb_foes, t.getMax(self, t)) * 0.2) end
-		end
-		p.nb_foes = nb_foes
-	end,
+	cooldown = 30,
+	sustain_stamina = 5,		-- This is here so that the talent auto-disables if stamina hits 0.
+	tactical = { BUFF = 2 },
+	getStam = function(self, t) return self:combatTalentLimit(t, 1, 105, 305) end,
+	getStamDegen = function(self, t) return self:combatTalentLimit(t, 1, 12, 22) end,
+	getDamUp = function(self, t) return self:combatTalentLimit(t, 1, 14, 24) end,
+	getCritUp = function(self, t) return self:combatTalentLimit(t, 1, 8, 12) end,
+	
 	activate = function(self, t)
-		local ret = { nb_foes=0 }
-		t.callbackOnAct(self, t, ret)
-		return ret
+		return {
+			stam = self:addTemporaryValue("max_stamina", t.getStam(self, t)),
+			self:addTemporaryValue("stamina", t.getStam(self, t)),	-- Added stamina is no longer 'empty,' so bonus stamina can be used immediately.
+			
+			bonus_damage = self:addTemporaryValue("inc_damage", {all=t.getDamUp(self, t)}),
+			degen = self:addTemporaryValue("stamina_regen", -t.getStamDegen(self, t)),
+			b_fight = self:addTemporaryValue("blind_fight", 1),
+			crit = self:addTemporaryValue("combat_generic_crit", t.getCritUp(self, t)),
+		}
 	end,
 	deactivate = function(self, t, p)
-		if p.tmpid then self:removeTemporaryValue("movement_speed", p.tmpid) end
+		self:removeTemporaryValue("max_stamina", p.stam)
+		self:removeTemporaryValue("inc_damage", p.bonus_damage)
+		self:removeTemporaryValue("stamina_regen", p.degen)
+		self:removeTemporaryValue("blind_fight", p.b_fight)
+		self:removeTemporaryValue("combat_generic_crit", p.crit)
 		return true
 	end,
 	info = function(self, t)
-		local p = self:isTalentActive(t.id)
-		local cur = 0
-		if p then cur = math.min(p.nb_foes, t.getMax(self, t)) * 20 end
-		return ([[No performance is complete without an audience!
-		For each foe in radius %d around you, you gain 20%% movement speed (up to %d%%).
-		Current bonus: %d%%.]])
-		:format(self:getTalentRadius(t), t.getMax(self, t) * 20, cur)
+		return ([[The toughest performances require intense, unrelenting concentration.
+		While active, your maximum stamina is increased by %d, all damage you deal is increased by %d%%, and your critical hit chance is increased by %d%%. Additionaly, you suffer no penalty when attacking unseen enemies.
+		This talent quickly consumes one's willpower, draining %d stamina per turn.]]):
+		format( t.getStam(self, t), t.getDamUp(self, t), t.getCritUp(self, t), t.getStamDegen(self, t))
 	end,
 }
 
 newTalent{
-	--Increases silence and confusion immunity, and confers bonus mental save.
+	--Increases silence and confusion immunity.
 	name = "Verbosity",
 	type = {"technique/performance-arts", 2},
 	require = techs_dex_req2,
@@ -84,22 +74,20 @@ newTalent{
 	mode = "passive",
 	getSImmune = function(self, t) return self:combatTalentLimit(t, 5, 0.2, 0.81) end,
 	getCImmune = function(self, t) return self:combatTalentLimit(t, 1, 0.15, 0.35) end,
-	getSave = function(self, t) return self:combatTalentScale(t, 12, 36, 0.75) end,
 	passives = function(self, t, p)
 		self:talentTemporaryValue(p, "silence_immune", t.getSImmune(self, t))
 		self:talentTemporaryValue(p, "confusion_immune", t.getCImmune(self, t))
-		self:talentTemporaryValue(p, "combat_mentalresist", t.getSave(self, t))
 	end,
 	info = function(self, t)
 		return ([[A minstrel's job is surprisingly difficult, given the mental fortitude needed to learn and remember new songs.
 		Years of singing and reciting verse have strengthened your mind and hardened your voice against external threats seeking to silence you.
-		Increases silence immunity by %d%% and confusion immunity by %d%%. Also confers +%d mental save.]]):
-		format(t.getSImmune(self, t) * 100, t.getCImmune(self, t) * 100, t.getSave(self, t))
+		Increases silence immunity by %d%% and confusion immunity by %d%%.]]):
+		format(t.getSImmune(self, t) * 100, t.getCImmune(self, t) * 100)
 	end,
 }
 
 newTalent{
-	-- Resets the cooldown of a random amount of techniques.
+	-- Resets the cooldown of a random amount of techniques and confers bonus defense and resistance to all damage for a short duration.
 	name = "Moxie",
 	type = {"technique/performance-arts", 3},
 	require = techs_dex_req3,
@@ -144,45 +132,24 @@ newTalent{
 }
 
 newTalent{
-	--Melee attack which cannot miss, is a critical hit, and has massive armor pentration. High cooldown.
-	--STATUS: NOT FINISHED
-	name = "Encore",
+	-- +Global speed and stam regen. -Fatigue.
+	name = "Virtuoso",
 	type = {"technique/performance-arts", 4},
-	require = techs_req4,
+	require = techs_dex_req4,
 	points = 5,
-	cooldown = 24,
-	tactical = { MANA = 1, STAMINA = 1, BUFF = 1 },
-	getDuration = function(self, t) return math.floor(self:combatTalentLimit(t, 24, 3, 7)) end, -- Limit < 24
-	no_energy = true,
-	action = function(self, t)
-		self:setEffect(self.EFF_MARTIAL_MAGIC, t.getDuration(self, t), {power = 10})
-		if self:getTalentLevel(t) >= 5 then
-			local effs = {}
-			-- Go through all spell effects
-			for eff_id, p in pairs(self.tmp) do
-				local e = self.tempeffect_def[eff_id]
-				if e.status == "detrimental" then
-					if e.subtype.silence then
-						effs[#effs+1] = {"effect", eff_id}
-					end
-				end
-			end
-			local nb = 10000
-			while #effs > 0 and nb > 0 do
-				local eff = rng.tableRemove(effs)
-				self:removeEffect(eff, silent, force)
-				nb = nb - 1
-				removed = removed + 1
-			end
-		end
-		return true
+	mode = "passive",
+	getSpd = function(self, t) return self:combatTalentScale(t, 0.05, 0.20, 0.75) end,
+	getStamRecover = function(self, t) return self:combatTalentScale(t, 1.0, 5.0, 0.75) end,
+	getFatigue = function(self, t) return self:combatTalentScale(t, 14, 30, 0.75) end,
+	passives = function(self, t, p)
+		self:talentTemporaryValue(p, "global_speed_base", t.getSpd(self, t))
+		self:recomputeGlobalSpeed()
+		self:talentTemporaryValue(p, "stamina_regen", t.getStamRecover(self, t))
+		self:talentTemporaryValue(p, "fatigue", -t.getFatigue(self, t))
 	end,
 	info = function(self, t)
-		local duration = t.getDuration(self, t)
-		return ([[The user enters a mystical martial form for %0.2f turns which allows them to utilize their stamina as mana or their mana as stamina.  The user's mana and stamina sustains will not drop unless both their mana and stamina reach zero.
-		At 5 points, activating this talent will remove all silence effects currently affecting the user.
-		This talent will automatically trigger if the user's mana or stamina drops to zero as long as it is not cooling down.
-		Using this talent does not take a turn.]]):
-		format(duration)
+		return ([[Your skill in the performance arts is unparalleled.
+		Global speed is increased by %0.1f%%, stamina regen is increased by %d, and fatigue is permanently reduced by %d%%.]]):
+		format(t.getSpd(self, t) * 100, t.getStamRecover(self, t), t.getFatigue(self, t))
 	end,
 }

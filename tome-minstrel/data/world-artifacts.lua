@@ -70,3 +70,23 @@ newEntity{ base = "BASE_TOOL_MISC",
 	max_power = 20, power_regen = 1,
 	use_talent = { id = Talents.T_PERFECT_STRIKE, level = 2, power = 20 },
 }
+
+newEntity{ base = "BASE_TOOL_MISC",
+	power_source = {technique=true},
+	unique = true,
+	name = "Jactator's Blowing Horn",
+	color = colors.GRAY, image = "object/artifact/blightstopper.png",
+	unided_name = "overgrown blowing horn",
+	desc = [[Covered in plant matter from decades of idleness, this blowing horn was the prized possession of Jactator, the Ur'kul Mercenary Company's first (and only) standard bearer. Those unfortunate enough to serve with Jactator bemoaned his limitless capacity for chitter-chatter and gossip.]],
+	level_range = {28, 40},
+	rarity = 200,
+	cost = 350,
+	material_level = 4,
+	wielder = {
+		max_stamina = 100,
+		stamina_regen = 5,
+		fatigue = -10,
+	},
+	max_power = 35, power_regen = 1,
+	use_talent = { id = Talents.T_SECOND_WIND, level = 2, power = 25 },
+}
