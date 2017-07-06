@@ -83,48 +83,39 @@ newTalent{
 }
 
 newTalent{
+	-- Draws 1 of 6 random beneficial effects.
+	-- STATUS: My god, the base code works. TODO: implement actual effects.
 	name = "Deck of Benevolence",
 	type = {"technique/luck-of-the-draw", 2},
-	require = techs_req2,
-	no_energy = true,
-	sustain_mana = 20,
-	mode = "sustained",
-	tactical = { BUFF = 2, Stamina = 1 },
+	message = "@Source@ draws from the Deck of Benevolence!",
 	points = 5,
-	cooldown = 5,
-	getStaminaMultiplier = function(self,t) return self:combatTalentScale(t, 0.1, 0.5, 0.75) end,
-	get_stamina_regen = function(self,t)
-		local sustain_count = 0
-
-		for tid, act in pairs(self.sustain_talents) do
-			sustain_count = sustain_count + 1
+	cooldown = 20,
+	require = techs_dex_req2,
+	tactical = { BUFF = 2 },
+	getHeal = function(self, t) return 100 + self:combatTalentMindDamage(t, 0, 350) end,
+	getInvDur = function(self, t) return self:combatTalentLimit(t, 1, 3, 5) end,
+	action = function(self, t)
+		randCard = math.random(1, 6)
+		
+		if randCard == 1 then
+			self:heal(t.getHeal(self, t), self)
+		else
+			self:setEffect(self.EFF_INVULNERABLE, t.getInvDur(self, t), {})
 		end
-		return (sustain_count * t.getStaminaMultiplier(self,t))
-	end,
-	activate = function(self, t)
-		local sustain_count = 1
-
-		for tid, act in pairs(self.sustain_talents) do
-			sustain_count = sustain_count + 1
-		end
-		self.stamina_regen = self.stamina_regen + (sustain_count  * t.getStaminaMultiplier(self,t))
-		return {
-			stam = self:addTemporaryValue("arcane_stamina_mult", t.getStaminaMultiplier(self,t))
-		}
-	end,
-	deactivate = function(self, t, p)
-		local sustain_count = 0
-
-		for tid, act in pairs(self.sustain_talents) do
-			sustain_count = sustain_count + 1
-		end
-		self.stamina_regen = self.stamina_regen - (sustain_count * self:attr("arcane_stamina_mult"))
-		self:removeTemporaryValue("arcane_stamina_mult", p.stam)
+		
 		return true
 	end,
 	info = function(self, t)
-		return ([[The user magically taps into their sustained powers, siphoning off a portion of the energy to restore the user's stamina.
-		Increases stamina regen by %0.2f per active sustain. Turning this talent on does not take a turn.]]):format(t.getStaminaMultiplier(self,t))
+		return ([[Invoke a card from the Deck of Benevolence, triggering one of six possible effects.
+		#YELLOW#Incipient Heroism#WHITE#
+		#YELLOW#Rapid Recomposition#WHITE#
+		Heal your body for %d life. Effects scale with Mindpower.
+		#YELLOW#Garkul's Wrath#WHITE#
+		Infuse yourself with the limitless wrath of Garkul the Devourer, temporarily increasing maximum health, attack speed, and damage dealt while reducing all damage taken.
+		#YELLOW#Parallel Assistance#WHITE#
+		#YELLOW#Emergency Phasing#WHITE#
+		#YELLOW#Invulnerability#WHITE#
+		Become invulnerable to all damage for %d rounds.]]):format(t.getHeal(self, t), t.getInvDur(self, t))
 	end,
 }
 

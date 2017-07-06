@@ -138,12 +138,13 @@ newTalent{
 	require = techs_dex_req4,
 	points = 5,
 	mode = "passive",
-	getSpd = function(self, t) return self:combatTalentScale(t, 0.05, 0.20, 0.75) end,
+	getSpd = function(self, t) return self:combatTalentScale(t, 0.10, 0.18, 0.75) end,
 	getStamRecover = function(self, t) return self:combatTalentScale(t, 1.0, 5.0, 0.75) end,
 	getFatigue = function(self, t) return self:combatTalentScale(t, 14, 30, 0.75) end,
 	passives = function(self, t, p)
 		self:talentTemporaryValue(p, "global_speed_base", t.getSpd(self, t))
 		self:recomputeGlobalSpeed()
+		
 		self:talentTemporaryValue(p, "stamina_regen", t.getStamRecover(self, t))
 		self:talentTemporaryValue(p, "fatigue", -t.getFatigue(self, t))
 	end,

@@ -42,3 +42,18 @@ newEffect{
 	end,
 }
 
+newEffect{
+	name = "INVULNERABLE", image = "talents/deck_of_benevolence.png",
+	desc = "Invulnerable",
+	long_desc = function(self, eff) return "This target is unaffected by any source of damage." end,
+	type = "other",
+	subtype = { arcane=true },
+	status = "beneficial",
+	parameters = { },
+	activate = function(self, eff)
+		eff.tmpid = self:addTemporaryValue("invulnerable", 1)
+	end,
+	deactivate = function(self, eff)
+		self:removeTemporaryValue("invulnerable", eff.tmpid)
+	end,
+}
