@@ -19,7 +19,8 @@
 
 -- Overall completion: 5%
 	-- Deck of Malevolence: 0%
-	-- Deck of Benevolence: 45% (there exists this mystical thing called 'balance,' but given its mystical nature, I don't know what 'balance' means.)
+	-- Deck of Benevolence: 99% (there exists this mystical thing called 'balance,' but given its mystical nature, I don't know what 'balance' means.)
+		-- TODO: Add message when Ace of Hearts is drawn.
 	-- Deck of Oddities: 0%
 	-- Ace in the Hole: 0%
 	
@@ -97,8 +98,7 @@ newTalent{
 
 newTalent{
 	-- Draws 1 of 6 random beneficial effects. Each effect is very powerful due to the random nature of this talent (as this is more of a defensive talent,
-	-- it's obviously more useful when at low health, but randomness is not the best solution out of a low-health problem). 10% chance to be really OP.
-	-- dear god please do not smite me for this code i think there is an easier way to do this but i don't know it yet
+	-- it's more useful when at low health, but randomness is not the best solution out of a low-health problem). 10% chance to be really OP.
 	name = "Deck of Benevolence",
 	type = {"technique/luck-of-the-draw", 2},
 	message = "@Source@ draws from the Deck of Benevolence!",
@@ -107,7 +107,9 @@ newTalent{
 	require = techs_dex_req2,
 	tactical = { BUFF = 2 },
 	-- Incipient Heroism scaling
-	
+	getPurge = function(self, t) return math.floor(self:combatTalentScale(t, 1, 3, "log")) end,
+	getStatBoost = function(self, t) return self:combatTalentScale(t, 4, 17, 0.75) end,
+	getStatDur = function(self, t) return self:combatTalentScale(t, 5, 8, 0.75) end,
 	-- Rapid Recomposition scaling
 	getHeal = function(self, t) return self:combatTalentMindDamage(t, 25, 300) end,
 	getRegen = function(self, t) return self:combatTalentMindDamage(t, 50, 200) end,
@@ -117,18 +119,87 @@ newTalent{
 	getBonSpd = function(self, t) return self:combatTalentLimit(t, 1, 0.24, 0.42) end,
 	getBonRes = function(self, t) return self:combatTalentLimit(t, 1, 10, 20) end,
 	getGarDur = function(self, t) return self:combatTalentLimit(t, 1, 5, 7) end,
+	-- Lucky Star scaling
+	getLuk = function(self, t) return self:combatTalentMindDamage(t, 35, 60) end,
+	getBonCrt = function(self, t) return self:combatTalentScale(t, 12, 24, 0.75) end,
+	getDamRed = function(self, t) return self:combatTalentMindDamage(t, 25, 50) end,
+	getLukDur = function(self, t) return self:combatTalentScale(t, 3, 5, 0.75) end,
+	-- Emergency Phasing scaling
+	getShield = function(self, t) return 25 + self:combatTalentMindDamage(t, 50, 150) end,
+	getShieldDur = function(self, t) return self:combatTalentScale(t, 5, 7, 0.75) end,
 	-- Invulnerability scaling
-	getInvDur = function(self, t) return self:combatTalentLimit(t, 1, 2, 4) end,	-- Why does it jump to 13 at talent level 6.5??
+	getInvDur = function(self, t) return self:combatTalentScale(t, 2, 4, 0.75) end,
 	
 	action = function(self, t)
-		randJoker = math.random(1, 10)
-		randCard = math.random(1, 6)
+		randJoker = math.random(1, 10)	-- Check to see if we draw the Ace of Hearts.
 		
-		if randCard == 2 then
+		-- Ace of Hearts is drawn!
+		if randJoker == 1 then
+			local effs = {}
+			local count = t.getPurge(self, t)
+			for eff_id, p in pairs(self.tmp) do
+				local e = self.tempeffect_def[eff_id]
+				if e.type ~= "other" and e.status == "detrimental" then
+					effs[#effs+1] = {"effect", eff_id}
+				end
+			end
+			for i = 1, t.getPurge(self, t) do
+				if #effs == 0 then break end
+				local eff = rng.tableRemove(effs)
+
+				if eff[1] == "effect" then
+					self:removeEffect(eff[2])
+					count = count - 1
+				end
+			end
+			self:setEffect(self.EFF_INCIPIENT_HEROISM, t.getStatDur(self, t), {power=t.getStatBoost(self, t)})
+			self:heal(t.getHeal(self, t), self)
+			self:setEffect(self.EFF_REGENERATION, 4, {power = t.getRegen(self, t)})
+			self:setEffect(self.EFF_GARKULS_WRATH, t.getGarDur(self, t), {hp = t.getBonHp(self, t), power = t.getBonDam(self, t), atkspd = t.getBonSpd(self, t), atkres = t.getBonRes(self, t)})
+			self:setEffect(self.EFF_LUCKY_STAR, t.getLukDur(self, t), {power = t.getLuk(self, t), crit = t.getBonCrt(self, t), negate = t.getDamRed(self, t)})
+			game.level.map:particleEmitter(self.x, self.y, 1, "teleport")
+			self:teleportRandom(self.x, self.y, 15, 8)
+			self:setEffect(self.EFF_DAMAGE_SHIELD, t.getShieldDur(self, t), {power=t.getShield(self, t)})
+			self:setEffect(self.EFF_INVULNERABLE, t.getInvDur(self, t), {})
+
+		else
+			-- Ace of Hearts not drawn.
+			randCard = math.random(1, 6)
+		end
+		
+		if randCard == 1 then
+			local effs = {}
+			local count = t.getPurge(self, t)
+			
+			-- Go through ALL effects (not including 'other' category)
+			for eff_id, p in pairs(self.tmp) do
+				local e = self.tempeffect_def[eff_id]
+				if e.type ~= "other" and e.status == "detrimental" then
+					effs[#effs+1] = {"effect", eff_id}
+				end
+			end
+
+			for i = 1, t.getPurge(self, t) do
+				if #effs == 0 then break end
+				local eff = rng.tableRemove(effs)
+
+				if eff[1] == "effect" then
+					self:removeEffect(eff[2])
+					count = count - 1
+				end
+			end
+			self:setEffect(self.EFF_INCIPIENT_HEROISM, t.getStatDur(self, t), {power=t.getStatBoost(self, t)})
+		elseif randCard == 2 then
 			self:heal(t.getHeal(self, t), self)
 			self:setEffect(self.EFF_REGENERATION, 4, {power = t.getRegen(self, t)})
 		elseif randCard == 3 then
 			self:setEffect(self.EFF_GARKULS_WRATH, t.getGarDur(self, t), {hp = t.getBonHp(self, t), power = t.getBonDam(self, t), atkspd = t.getBonSpd(self, t), atkres = t.getBonRes(self, t)})
+		elseif randCard == 4 then
+			self:setEffect(self.EFF_LUCKY_STAR, t.getLukDur(self, t), {power = t.getLuk(self, t), crit = t.getBonCrt(self, t), negate = t.getDamRed(self, t)})
+		elseif randCard == 5 then
+			game.level.map:particleEmitter(self.x, self.y, 1, "teleport")
+			self:teleportRandom(self.x, self.y, 15, 8)
+			self:setEffect(self.EFF_DAMAGE_SHIELD, t.getShieldDur(self, t), {power=t.getShield(self, t)})
 		else
 			self:setEffect(self.EFF_INVULNERABLE, t.getInvDur(self, t), {})
 		end
@@ -138,21 +209,22 @@ newTalent{
 	info = function(self, t)
 		return ([[Invoke a card from the Deck of Benevolence, triggering one of six possible effects.
 		#YELLOW#Incipient Heroism#WHITE#
-		Clear up to XX physical, magical, or mental debuffs and gain XX to all stats for XX turns.
+		Clear up to %d physical, magical, or mental debuffs and gain +%d to all stats for %d turns.
 		#YELLOW#Rapid Recomposition#WHITE#
 		Heal yourself for %d life, and gain a regeneration effect which restores %d health over 4 turns.
 		#YELLOW#Garkul's Wrath#WHITE#
-		For %d rounds, gain +%d maximum health, +%d%% attack speed, and +%d%% to all damage dealt while reducing all damage taken by %d%%.
-		#YELLOW#Parallel Assistance#WHITE#
-		Conjure 3 allies (level XX) to your side for XX turns.
+		For %d turns, gain +%d maximum health, +%d%% attack speed, and +%d%% to all damage dealt while reducing all damage taken by %d%%.
+		#YELLOW#Lucky Star#WHITE#
+		Confers +%d luck, +%d%% critical hit chance, and %d flat damage reduction for %d turns.
 		#YELLOW#Emergency Phasing#WHITE#
-		Teleport to a random area within range XX, and become out of phase for XX turns.
+		Teleport to a random area within 8-15 tiles and gain a damage shield that absorbs up to %d points of damage for %d turns.
 		#YELLOW#Invulnerability#WHITE#
 		Negate all damage taken for %d turns.
 		
 		There is a 10%% chance to draw the #RED#Ace of Hearts#WHITE#, which simultaneously triggers all six effects.
-		Effects scale with Mindpower.]]):format(t.getHeal(self, t), t.getRegen(self, t) * 4, 
-		t.getGarDur(self, t), t.getBonHp(self, t), t.getBonSpd(self, t)*100, t.getBonDam(self, t), t.getBonRes(self, t), t.getInvDur(self, t))
+		Effects scale with Mindpower.]]):format(t.getPurge(self, t), t.getStatBoost(self, t), t.getStatDur(self, t), t.getHeal(self, t), t.getRegen(self, t) * 4,
+		t.getGarDur(self, t), t.getBonHp(self, t), t.getBonSpd(self, t)*100, t.getBonDam(self, t), t.getBonRes(self, t),
+		t.getLuk(self, t), t.getBonCrt(self, t), t.getDamRed(self, t), t.getLukDur(self, t), t.getShield(self, t), t.getShieldDur(self, t), t.getInvDur(self, t))
 	end,
 }
 

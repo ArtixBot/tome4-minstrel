@@ -43,7 +43,7 @@ newEffect{
 }
 
 newEffect{
-	name = "INVULNERABLE", image = "talents/deck_of_benevolence.png",
+	name = "INVULNERABLE", image = "talents/forcefield.png",
 	desc = "Invulnerable",
 	long_desc = function(self, eff) return "This target is unaffected by any source of damage." end,
 	type = "other",
