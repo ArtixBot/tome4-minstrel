@@ -8,6 +8,7 @@ class:bindHook("ToME:load", function(self, data)
 	ActorTalents:loadDefinition("/data-minstrel/talents/techniques/techniques-minstrel.lua")
 	ActorTemporaryEffects:loadDefinition("/data-minstrel/mental.lua")
 	ActorTemporaryEffects:loadDefinition("/data-minstrel/other.lua")
+	ActorTemporaryEffects:loadDefinition("/data-minstrel/physical.lua")
 	Birther:loadDefinition("/data-minstrel/birth/classes/minstrelclass.lua")
 end)
 

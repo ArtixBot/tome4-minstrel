@@ -17,8 +17,15 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
+-- Overall completion: 5%
+	-- Deck of Malevolence: 0%
+	-- Deck of Benevolence: 45% (there exists this mystical thing called 'balance,' but given its mystical nature, I don't know what 'balance' means.)
+	-- Deck of Oddities: 0%
+	-- Ace in the Hole: 0%
+	
 newTalent{
-	-- Draws 1 of 6 random damaging abilities.
+	-- Draws 1 of 6 random damaging abilities. Ability power is slightly less compared to Deck of Benevolence (due to reliability concerns).
+	-- 5% chance to draw the deck's joker, dealing massive AoE elemental damage.
 	-- STATUS: Borked up beyond belief, like holy crap; fix this stuff.
 	name = "Deck of Malevolence",
 	type = {"technique/luck-of-the-draw", 1},
@@ -76,29 +83,52 @@ newTalent{
 		return true
 	end,
 	info = function(self, t)
-		return ([[Dash to a target tile with blinding speed.
-		Targeting an enemy with this ability will deliver a strike that deals 125%% weapon damage. A successful hit conserves your momentum, temporarily granting +%d%% global speed for 2 turns.
-		To build up momentum, the target tile must be at least 2 tiles away from the user.]]):format(100*t.getSpeed(self, t))
+		return ([[Invoke a card from the Deck of Malevolence, triggering one of six possible effects.
+		#YELLOW#Repulsion Blast#WHITE#
+		#YELLOW#Degrade#WHITE#
+		#YELLOW#Gravity Spike#WHITE#
+		#YELLOW#Arcane Negation Field#WHITE#
+		#YELLOW#Spellblaze Storm#WHITE#
+		#YELLOW#Mass Confusion#WHITE#
+		
+		There is a 10%% chance to draw the #RED#Ace of Diamonds#WHITE#, which deals massive, multi-elemental damage in an area around the user.]])
 	end,
 }
 
 newTalent{
-	-- Draws 1 of 6 random beneficial effects.
-	-- STATUS: My god, the base code works. TODO: implement actual effects.
+	-- Draws 1 of 6 random beneficial effects. Each effect is very powerful due to the random nature of this talent (as this is more of a defensive talent,
+	-- it's obviously more useful when at low health, but randomness is not the best solution out of a low-health problem). 10% chance to be really OP.
+	-- dear god please do not smite me for this code i think there is an easier way to do this but i don't know it yet
 	name = "Deck of Benevolence",
 	type = {"technique/luck-of-the-draw", 2},
 	message = "@Source@ draws from the Deck of Benevolence!",
 	points = 5,
-	cooldown = 20,
+	cooldown = 0,
 	require = techs_dex_req2,
 	tactical = { BUFF = 2 },
-	getHeal = function(self, t) return 100 + self:combatTalentMindDamage(t, 0, 350) end,
-	getInvDur = function(self, t) return self:combatTalentLimit(t, 1, 3, 5) end,
+	-- Incipient Heroism scaling
+	
+	-- Rapid Recomposition scaling
+	getHeal = function(self, t) return self:combatTalentMindDamage(t, 25, 300) end,
+	getRegen = function(self, t) return self:combatTalentMindDamage(t, 50, 200) end,
+	-- Garkul's Wrath scaling
+	getBonHp = function(self, t) return 100 + self:combatTalentMindDamage(t, 0, 150) end,
+	getBonDam = function(self, t) return self:combatTalentLimit(t, 1, 16, 26) end,
+	getBonSpd = function(self, t) return self:combatTalentLimit(t, 1, 0.24, 0.42) end,
+	getBonRes = function(self, t) return self:combatTalentLimit(t, 1, 10, 20) end,
+	getGarDur = function(self, t) return self:combatTalentLimit(t, 1, 5, 7) end,
+	-- Invulnerability scaling
+	getInvDur = function(self, t) return self:combatTalentLimit(t, 1, 2, 4) end,	-- Why does it jump to 13 at talent level 6.5??
+	
 	action = function(self, t)
+		randJoker = math.random(1, 10)
 		randCard = math.random(1, 6)
 		
-		if randCard == 1 then
+		if randCard == 2 then
 			self:heal(t.getHeal(self, t), self)
+			self:setEffect(self.EFF_REGENERATION, 4, {power = t.getRegen(self, t)})
+		elseif randCard == 3 then
+			self:setEffect(self.EFF_GARKULS_WRATH, t.getGarDur(self, t), {hp = t.getBonHp(self, t), power = t.getBonDam(self, t), atkspd = t.getBonSpd(self, t), atkres = t.getBonRes(self, t)})
 		else
 			self:setEffect(self.EFF_INVULNERABLE, t.getInvDur(self, t), {})
 		end
@@ -108,18 +138,26 @@ newTalent{
 	info = function(self, t)
 		return ([[Invoke a card from the Deck of Benevolence, triggering one of six possible effects.
 		#YELLOW#Incipient Heroism#WHITE#
+		Clear up to XX physical, magical, or mental debuffs and gain XX to all stats for XX turns.
 		#YELLOW#Rapid Recomposition#WHITE#
-		Heal your body for %d life. Effects scale with Mindpower.
+		Heal yourself for %d life, and gain a regeneration effect which restores %d health over 4 turns.
 		#YELLOW#Garkul's Wrath#WHITE#
-		Infuse yourself with the limitless wrath of Garkul the Devourer, temporarily increasing maximum health, attack speed, and damage dealt while reducing all damage taken.
+		For %d rounds, gain +%d maximum health, +%d%% attack speed, and +%d%% to all damage dealt while reducing all damage taken by %d%%.
 		#YELLOW#Parallel Assistance#WHITE#
+		Conjure 3 allies (level XX) to your side for XX turns.
 		#YELLOW#Emergency Phasing#WHITE#
+		Teleport to a random area within range XX, and become out of phase for XX turns.
 		#YELLOW#Invulnerability#WHITE#
-		Become invulnerable to all damage for %d rounds.]]):format(t.getHeal(self, t), t.getInvDur(self, t))
+		Negate all damage taken for %d turns.
+		
+		There is a 10%% chance to draw the #RED#Ace of Hearts#WHITE#, which simultaneously triggers all six effects.
+		Effects scale with Mindpower.]]):format(t.getHeal(self, t), t.getRegen(self, t) * 4, 
+		t.getGarDur(self, t), t.getBonHp(self, t), t.getBonSpd(self, t)*100, t.getBonDam(self, t), t.getBonRes(self, t), t.getInvDur(self, t))
 	end,
 }
 
 newTalent{
+	-- Draws one of six cards, all extremely powerful but incredibly variate in what they actually do. One-in-six chance to backfire. Very badly.
 	name = "Deck of Oddities",
 	type = {"technique/luck-of-the-draw", 3},
 	require = techs_req3,
@@ -162,7 +200,9 @@ newTalent{
 }
 
 newTalent{
-	name = "Trump Card", -- no cost; it's main purpose is to give the player an alternative means of using mana/stamina based talents
+	-- Passively boosts mastery levels of all three Decks. Activate to dramatically increase this boost for one turn (at the cost of temporarily reducing
+	-- mastery levels of decks afterwards).
+	name = "Ace in the Hole", -- no cost; it's main purpose is to give the player an alternative means of using mana/stamina based talents
 	type = {"technique/luck-of-the-draw", 4},
 	require = techs_req4,
 	points = 5,
