@@ -17,12 +17,12 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
--- Overall completion: 5%
+-- Overall completion: 35%
 	-- Deck of Malevolence: 0%
 	-- Deck of Benevolence: 99% (there exists this mystical thing called 'balance,' but given its mystical nature, I don't know what 'balance' means.)
 		-- TODO: Add message when Ace of Hearts is drawn.
-	-- Deck of Oddities: 0%
-	-- Ace in the Hole: 0%
+	-- Deck of Oddities: 40%
+	-- Ace in the Hole: 20%
 	
 newTalent{
 	-- Draws 1 of 6 random damaging abilities. Ability power is slightly less compared to Deck of Benevolence (due to reliability concerns).
@@ -98,14 +98,18 @@ newTalent{
 
 newTalent{
 	-- Draws 1 of 6 random beneficial effects. Each effect is very powerful due to the random nature of this talent (as this is more of a defensive talent,
-	-- it's more useful when at low health, but randomness is not the best solution out of a low-health problem). 10% chance to be really OP.
+	-- it's more useful when at low health, but randomness is not the best solution out of a low-health problem). 12.5% chance to be really OP.
 	name = "Deck of Benevolence",
 	type = {"technique/luck-of-the-draw", 2},
 	message = "@Source@ draws from the Deck of Benevolence!",
 	points = 5,
-	cooldown = 0,
+	cooldown = 20,
 	require = techs_dex_req2,
 	tactical = { BUFF = 2 },
+	fixed_cooldown = true,
+	no_energy = true,
+	no_npc_use = true,
+	
 	-- Incipient Heroism scaling
 	getPurge = function(self, t) return math.floor(self:combatTalentScale(t, 1, 3, "log")) end,
 	getStatBoost = function(self, t) return self:combatTalentScale(t, 4, 17, 0.75) end,
@@ -131,7 +135,7 @@ newTalent{
 	getInvDur = function(self, t) return self:combatTalentScale(t, 2, 4, 0.75) end,
 	
 	action = function(self, t)
-		randJoker = math.random(1, 10)	-- Check to see if we draw the Ace of Hearts.
+		randJoker = math.random(1, 8)	-- Check to see if we draw the Ace of Hearts.
 		
 		-- Ace of Hearts is drawn!
 		if randJoker == 1 then
@@ -152,6 +156,8 @@ newTalent{
 					count = count - 1
 				end
 			end
+			
+			-- TODO: there has to be a better way than this...
 			self:setEffect(self.EFF_INCIPIENT_HEROISM, t.getStatDur(self, t), {power=t.getStatBoost(self, t)})
 			self:heal(t.getHeal(self, t), self)
 			self:setEffect(self.EFF_REGENERATION, 4, {power = t.getRegen(self, t)})
@@ -209,9 +215,9 @@ newTalent{
 	info = function(self, t)
 		return ([[Invoke a card from the Deck of Benevolence, triggering one of six possible effects.
 		#YELLOW#Incipient Heroism#WHITE#
-		Clear up to %d physical, magical, or mental debuffs and gain +%d to all stats for %d turns.
+		Clear up to %d debuffs (physical, magical, or mental) and increase all stats by %d for %d turns.
 		#YELLOW#Rapid Recomposition#WHITE#
-		Heal yourself for %d life, and gain a regeneration effect which restores %d health over 4 turns.
+		Restore %d life and then regenerate %d health over 4 turns.
 		#YELLOW#Garkul's Wrath#WHITE#
 		For %d turns, gain +%d maximum health, +%d%% attack speed, and +%d%% to all damage dealt while reducing all damage taken by %d%%.
 		#YELLOW#Lucky Star#WHITE#
@@ -221,7 +227,7 @@ newTalent{
 		#YELLOW#Invulnerability#WHITE#
 		Negate all damage taken for %d turns.
 		
-		There is a 10%% chance to draw the #RED#Ace of Hearts#WHITE#, which simultaneously triggers all six effects.
+		There is a 12.5%% (separate roll) chance to draw the #RED#Ace of Hearts#WHITE#, which simultaneously triggers all six effects.
 		Effects scale with Mindpower.]]):format(t.getPurge(self, t), t.getStatBoost(self, t), t.getStatDur(self, t), t.getHeal(self, t), t.getRegen(self, t) * 4,
 		t.getGarDur(self, t), t.getBonHp(self, t), t.getBonSpd(self, t)*100, t.getBonDam(self, t), t.getBonRes(self, t),
 		t.getLuk(self, t), t.getBonCrt(self, t), t.getDamRed(self, t), t.getLukDur(self, t), t.getShield(self, t), t.getShieldDur(self, t), t.getInvDur(self, t))
@@ -229,88 +235,102 @@ newTalent{
 }
 
 newTalent{
-	-- Draws one of six cards, all extremely powerful but incredibly variate in what they actually do. One-in-six chance to backfire. Very badly.
+	-- Draws one of six cards, all extremely powerful but incredibly variate in what their effects.
 	name = "Deck of Oddities",
-	type = {"technique/luck-of-the-draw", 3},
-	require = techs_req3,
-	mode = "sustained",
-	sustain_mana = 30,
-	no_energy = true,
-	cooldown = 5,
+	type = {"technique/luck-of-the-draw", 2},
+	message = "@Source@ draws from the Deck of Oddities!",
 	points = 5,
+	cooldown = 0,
+	require = techs_dex_req2,
 	tactical = { BUFF = 2 },
-	getDamageReduction = function(self,t) return self:combatTalentSpellDamage(t, 2, 40) end,
-	getManaRatio = function(self,t) return 0.05 + self:combatTalentLimit(t, 1, 0.01, 0.05) end,  --Limit less than 1.0 ratio
-	activate = function(self, t)
-		local power = self:getTalentLevel(t) * 2.5
-		return {
-			fatigue = self:addTemporaryValue("fatigue", -power),
-		}
-	end,
-	deactivate = function(self, t, p)
-		self:removeTemporaryValue("fatigue",p.fatigue)
+	no_energy = true,
+	no_npc_use = true,
+	
+	-- Lunar Cloak scaling
+	getInvisPwr = function(self, t) return self:combatTalentScale(t, 216, 342, 0.75) end,
+	getInvisDur = function(self, t) return self:combatTalentScale(t, 12, 18, 0.75) end,
+	-- Necromutation scaling
+	getNecroDur = function(self, t) return self:combatTalentScale(t, 15, 20, 0.75) end,
+	getDieAt = function(self, t) return self:combatTalentScale(t, 650, 2150, 0.75) end,
+	getAffinity = function(self, t) return self:combatTalentScale(t, 30, 60, 0.75) end,
+	getArmor = function(self, t) return self:combatTalentScale(t, 44, 81, 0.75) end,
+	getPwr = function(self, t) return self:combatTalentScale(t, 21, 50, 0.75) end,
+	-- Za Warudo scaling
+	getBonTurn = function(self, t) return self:combatTalentLimit(t, 1, 2, 5) end,
+	
+	action = function(self, t)
+		randCard = math.random(1, 6)
+		
+		if randCard == 1 then
+			self:setEffect(self.EFF_INVULNERABLE, 1, {})
+		elseif randCard == 2 then
+			self:setEffect(self.EFF_INVISIBILITY, t.getInvisDur(self, t), {power = t.getInvisPwr(self, t), penalty = 0, false})
+		elseif randCard == 4 then
+			self:setEffect(self.EFF_NECROMUTATION, t.getInvisDur(self, t), {heroism = t.getDieAt(self, t), affinity = t.getAffinity(self, t), armor = t.getArmor(self, t), power = t.getPwr(self, t)})	-- Placeholder values!
+		else
+			game:onTickEnd(function()
+			self.energy.value = self.energy.value + (t.getBonTurn(self, t) * 1000)
+			self:setEffect(self.EFF_TIME_STOP, 1, {power=0})
+			
+			game.logSeen(self, "#STEEL_BLUE#%s has stopped time!#LAST#", self.name:capitalize())
+			game:playSoundNear(self, "talents/heal")
+			end)
+		end
+		
 		return true
 	end,
-	callbackOnTakeDamage = function(self, t, src, x, y, type, dam, state)
-	    if self:knowTalent(self.T_ARCANE_ARMOR) and self:isTalentActive(self.T_ARCANE_ARMOR) then
-		    if dam <= t.getDamageReduction(self,t)  then
-		        self:incMana(dam*t.getManaRatio(self,t))
-			    dam = 0
-		    else
-		        self:incMana(t.getDamageReduction(self,t)*t.getManaRatio(self,t))
-		    	dam = dam - t.getDamageReduction(self,t)
-		    end
-		end
-        return {dam=dam}
-	end,
-
 	info = function(self, t)
-		local power = self:getTalentLevel(t) * 2.5
-		return ([[Enchants the user's armor, making it lighter and capable of absorbing damage and converting it to mana.  Reduces fatigue by %d%% and reduces all sources of damage by %d. Restores %d%% of the damage absorbed as mana.
-		Turning this talent on does not take a turn.]]):format(power,t.getDamageReduction(self,t),t.getManaRatio(self,t)*100)
+		return ([[Invoke a card from the Deck of Oddities, triggering one of six possible effects.
+		#YELLOW#Connate Summoning#WHITE#
+		#YELLOW#Lunar Cloak#WHITE#
+		Become invisible (power %d) for %d turns. This effect does not confer a damage penalty and allows health regeneration.
+		#YELLOW#Mass Psychoportation#WHITE#
+		#YELLOW#Necromutation#WHITE#
+		Transform into a demilich. For %d turns, global speed is reduced by 50%%, and your healing mod is set to zero. Gain listed bonuses:
+		- You can only die when reaching -%d health.
+		- Gain %d%% cold and darkness damage affinity.
+		- Immunity to poison, diseases, and stuns.
+		- Armor hardiness increases to 100%%, and armor increased by %d.
+		- All saves, Physical Power, Spellpower, and Mindpower increased by %d.
+		This effect cannot be dispelled or removed early.
+		#YELLOW#Sundering Conflagration#WHITE#
+		#YELLOW#The World#WHITE#
+		Gain %d turns. Damage is not reduced while time is stopped.
+		
+		There is a 10%% chance to draw the #GREY#Ace of Clubs#WHITE#, which will trigger three random effects from the Deck of Oddities.]]):format(
+		t.getInvisPwr(self, t), t.getInvisDur(self, t), t.getNecroDur(self, t), t.getDieAt(self, t), t.getAffinity(self, t), t.getArmor(self, t), t.getPwr(self, t),
+		t.getBonTurn(self, t))
 	end,
 }
 
 newTalent{
-	-- Passively boosts mastery levels of all three Decks. Activate to dramatically increase this boost for one turn (at the cost of temporarily reducing
-	-- mastery levels of decks afterwards).
-	name = "Ace in the Hole", -- no cost; it's main purpose is to give the player an alternative means of using mana/stamina based talents
+	-- While active, mastery of card invocation talents increased. Deactivate to increase this buff for a short period of time.
+	-- STATUS: Partially implemented; sustained effect is working, but need to implement the boost effect (and subsequent debuff).
+	name = "Ace in the Hole",
 	type = {"technique/luck-of-the-draw", 4},
-	require = techs_req4,
+	require = techs_dexreq4,
 	points = 5,
-	cooldown = 24,
-	tactical = { MANA = 1, STAMINA = 1, BUFF = 1 },
-	getDuration = function(self, t) return math.floor(self:combatTalentLimit(t, 24, 3, 7)) end, -- Limit < 24
-	no_energy = true,
-	action = function(self, t)
-		self:setEffect(self.EFF_MARTIAL_MAGIC, t.getDuration(self, t), {power = 10})
-		if self:getTalentLevel(t) >= 5 then
-			local effs = {}
-			-- Go through all spell effects
-			for eff_id, p in pairs(self.tmp) do
-				local e = self.tempeffect_def[eff_id]
-				if e.status == "detrimental" then
-					if e.subtype.silence then
-						effs[#effs+1] = {"effect", eff_id}
-					end
-				end
-			end
-			local nb = 10000
-			while #effs > 0 and nb > 0 do
-				local eff = rng.tableRemove(effs)
-				self:removeEffect(eff, silent, force)
-				nb = nb - 1
-				removed = removed + 1
-			end
-		end
+	mode = "sustained",
+	cooldown = 30,
+	sustain_stamina = 20,
+	tactical = { BUFF = 2 },
+
+	getMasteryUp = function(self, t) return 0.25 end,
+	getBuffMastery = function(self, t) return self:combatTalentScale(t, 1.00, 1.70, 0.75) end,
+	activate = function(self, t)
+		return {
+			self:setTalentTypeMastery("technique/luck-of-the-draw", self:getTalentTypeMastery("technique/luck-of-the-draw") + t.getMasteryUp(self, t))
+		}
+	end,
+	deactivate = function(self, t, p)
+		self:setTalentTypeMastery("technique/luck-of-the-draw", self:getTalentTypeMastery("technique/luck-of-the-draw") - t.getMasteryUp(self, t))
 		return true
 	end,
 	info = function(self, t)
-		local duration = t.getDuration(self, t)
-		return ([[The user enters a mystical martial form for %0.2f turns which allows them to utilize their stamina as mana or their mana as stamina.  The user's mana and stamina sustains will not drop unless both their mana and stamina reach zero.
-		At 5 points, activating this talent will remove all silence effects currently affecting the user.
-		This talent will automatically trigger if the user's mana or stamina drops to zero as long as it is not cooling down.
-		Using this talent does not take a turn.]]):
-		format(duration)
+		return ([[While active, your mastery of Technique / Card invocation skills is increased by +0.25.
+		Deactivating this ability will confer a one-turn buff that increases your mastery of Technique / Card invocation skills by %0.1f.
+		After the buff ends, your mastery of card invocation will be halved for a short period of time.]]):format(
+		t.getBuffMastery(self, t))
 	end,
 }
+
