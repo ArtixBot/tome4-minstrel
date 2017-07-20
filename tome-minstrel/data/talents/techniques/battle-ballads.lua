@@ -18,14 +18,14 @@
 -- darkgod@te4.org
 
 newTalent{
-	name = "Symphony of Superiority",
+	name = "test1",
 	type = {"technique/battle-ballads", 1},
 	require = techs_req1,
 	points = 5,
 	mode = "sustained",
 	cooldown = 10,
 	sustain_stamina = 40,
-	tactical = { BUFF = 2 },
+	tactical = { ATTACKAREA = 3 },
 	getStatIncrease = function(self, t) return math.floor(self:combatTalentSpellDamage(t, 2, 10)) end,
 	activate = function(self, t)
 		game:playSoundNear(self, "talents/spell_generic")
@@ -47,9 +47,9 @@ newTalent{
 	end,
 	info = function(self, t)
 		local statinc = t.getStatIncrease(self, t)
-		return ([[You concentrate on your inner self, increasing all your stats by %d.
-		The stat increase will improve with your Spellpower.]]):
-		format(statinc)
+		return ([[Disrupt the tempo of adjacent enemies with deadly song, dealing XX damage and inflicting Tempo Disruption on hit targets.
+		An enemy afflicted by Tempo Disruption will first be globally slowed by 20%% for XX turns, then confused (25%% strength) for XX turns, and finally stunned for XX turns.
+		Damage increases with Mindpower.]])
 	end,
 }
 
@@ -136,8 +136,7 @@ newTalent{
 
 	info = function(self, t)
 		local power = self:getTalentLevel(t) * 2.5
-		return ([[Enchants the user's armor, making it lighter and capable of absorbing damage and converting it to mana.  Reduces fatigue by %d%% and reduces all sources of damage by %d. Restores %d%% of the damage absorbed as mana.
-		Turning this talent on does not take a turn.]]):format(power,t.getDamageReduction(self,t),t.getManaRatio(self,t)*100)
+		return ([[Bolster your resilience, increasing heal mod, crit reduction, Armor, and resistance to physical damage.]])
 	end,
 }
 

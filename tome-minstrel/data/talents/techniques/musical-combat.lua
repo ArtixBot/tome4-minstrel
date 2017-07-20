@@ -17,11 +17,10 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
--- Overall completion: 85%
+-- Overall completion: 95%
 	-- Opening Sweep: 80%
 		-- TODO: Disable ability to dash to any tile so long as it is unoccupied.
-	-- Solo: 50%
-		-- TODO: Implement global +spd buff per enemy hit by Solo.
+	-- Symphonic Whirl: 100%
 	-- Cadenza: 100%
 	-- Finale: 100%
 
@@ -90,9 +89,8 @@ newTalent{
 }
 
 newTalent{
-	-- AoE cone ability which debuffs accuracy of all units caught in the area and boosts caster speed based on number of enemies hit.
-	-- STATUS: Targeting works, and -acc debuff applies correctly; need to implement +spd buff.
-	name = "Solo",
+	-- Strike all adjacent enemies and inflict a debuff which gets more intense over time.
+	name = "Symphonic Whirl",
 	type = {"technique/musical-combat", 2},
 	require = techs_dex_req2,
 	points = 5,
@@ -102,25 +100,30 @@ newTalent{
 	radius = function(self, t) return math.floor(self:combatTalentScale(t, 4, 8)) end,
 	getDuration = function(self, t) return math.floor(self:combatTalentScale(t, 5, 7)) end,
 	target = function(self, t)
-		return {type="cone", range=self:getTalentRange(t), radius=self:getTalentRadius(t), selffire=false}
+		return {type="ball", range=self:getTalentRange(t), selffire=false, radius=1}
 	end,
-	requires_target = true,
-	tactical = { DISABLE = 2 },
+	tactical = { ATTACKAREA = 3 },
 	action = function(self, t)
+	
 		local tg = self:getTalentTarget(t)
-		local x, y = self:getTarget(tg)
-		if not x or not y then return nil end
-		self:project(tg, x, y, function(px, py)
+		
+		self:project(tg, self.x, self.y, function(px, py, tg, self)
 			local target = game.level.map(px, py, Map.ACTOR)
-			if not target then return end
-			target:setEffect(target.EFF_SOLO_DEBUFF, t.getDuration(self, t), {power=7 * self:getTalentLevel(t)})
+			if target and target ~= self then
+				self:attackTarget(target, nil, self:combatTalentWeaponDamage(t, 0.47, 1.00), true)
+				target:setEffect(target.EFF_TEMPO_DISRUPTION, 2, {})
+			end
 		end)
-		game.level.map:particleEmitter(self.x, self.y, self:getTalentRadius(t), "directional_shout", {life=12, size=5, tx=x-self.x, ty=y-self.y, distorion_factor=0.1, radius=self:getTalentRadius(t), nb_circles=8, rm=0.8, rM=1, gm=0.8, gM=1, bm=0.1, bM=0.2, am=0.6, aM=0.8})
+
+		self:addParticles(Particles.new("meleestorm", 1, {}))
 		return true
 	end,
 	info = function(self, t)
-		return ([[A shattering solo disrupts the focus of your foes within a conal area (radius of %d). All enemies hit have their Accuracy lowered by %d for %d turns.]]):
-		format(self:getTalentRadius(t), 7 * self:getTalentLevel(t), t.getDuration(self, t))
+		return ([[Disrupt the tempo of adjacent enemies with your blades, dealing %d%% weapon damage and inflicting Tempo Disruption on hit targets.
+		An enemy afflicted by Tempo Disruption will be impaired over three stages, each of which lasts 2 turns.
+		Stage 1: All damage dealt is reduced by 20%%.
+		Stage 2: Confused (25%% strength) and all damage dealt reduced by 40%%.
+		Stage 3: All resistances reduced by 25%% and stunned.]]):format(100 * self:combatTalentWeaponDamage(t, 0.47, 1.00))
 	end,
 }
 
@@ -185,7 +188,7 @@ newTalent{
 		local tg = self:getTalentTarget(t)
 		local x, y, target = self:getTarget(tg)
 		if not target or not self:canProject(tg, x, y) then return nil end
-		local hit = self:attackTarget(target, nil, self:combatTalentWeaponDamage(t, 4.00, 6.00), true)
+		local hit = self:attackTarget(target, nil, self:combatTalentWeaponDamage(t, 4.50, 6.50), true)
 		self:setEffect(self.EFF_FINALE_DEBUFF, 4, {power=0.35, apply_power=10000, no_ct_effect=true})
 		
 		return true

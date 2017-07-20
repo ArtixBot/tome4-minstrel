@@ -97,3 +97,78 @@ newEffect{
 		self:removeTemporaryValue("flat_damage_armor", eff.armor)
 	end,
 }
+
+newEffect{
+	name = "TEMPO_DISRUPTION", image = "talents/symphonic_whirl.png",
+	desc = "Tempo Disruption 1",
+	long_desc = function(self, eff) return ("All damage dealt reduced by 20%. Effect will worsen over time.") end,
+	type = "physical",
+	subtype = { morale=true },
+	status = "detrimental",
+	parameters = {},
+	on_gain = function(self, err) return "#Target# is disrupted!", "+Tempo 1" end,
+	on_lose = function(self, err) return "#Target#'s disruption is exacerbated!", "+Tempo 2" end,
+	activate = function(self, eff)
+		eff.dam_penalty = self:addTemporaryValue("inc_damage", {all=-20})
+	end,
+	deactivate = function(self, eff)
+		self:removeTemporaryValue("inc_damage", eff.dam_penalty)
+		self:setEffect(self.EFF_TEMPO_DISRUPTION_II, 1, {})
+	end,
+}
+
+newEffect{
+	name = "TEMPO_DISRUPTION_II", image = "talents/symphonic_whirl.png",
+	desc = "Tempo Disruption 2",
+	long_desc = function(self, eff) return ("Confused (25% strength) and all damage dealt reduced by 40%. Effect will worsen over time.") end,
+	type = "physical",
+	subtype = { morale=true },
+	status = "detrimental",
+	parameters = {},
+	on_lose = function(self, err) return "#Target#'s disruption is further exacerbated!", "+Tempo 3" end,
+	activate = function (self, eff)
+		eff.dam_penalty = self:addTemporaryValue("inc_damage", {all=-40})
+		eff.tmpid = self:addTemporaryValue("confused", 25)
+	end,
+	deactivate = function(self, eff)
+		self:removeTemporaryValue("inc_damage", eff.dam_penalty)
+		self:removeTemporaryValue("confused", eff.tmpid)
+		self:setEffect(self.EFF_TEMPO_DISRUPTION_III, 1, {})
+	end,
+}
+
+newEffect{
+	name = "TEMPO_DISRUPTION_III", image = "talents/symphonic_whirl.png",
+	desc = "Tempo Disruption 3",
+	long_desc = function(self, eff) return ("Stunned, and all damage resistances reduced by 25%. While stunned, damage dealt is reduced by 60%, 3 random talents are put on cooldown, movement speed is reduced by 50% and talents do not cooldown.") end,
+	type = "physical",
+	subtype = { morale=true },
+	status = "detrimental",
+	parameters = {},
+	on_lose = function(self, err) return "#Target# is no longer disrupted.", "-Tempo 3" end,
+	activate = function (self, eff)
+		eff.tmpid = self:addTemporaryValue("stunned", 1)
+		eff.tcdid = self:addTemporaryValue("no_talents_cooldown", 1)
+		eff.speedid = self:addTemporaryValue("movement_speed", -0.5)
+		
+		local tids = {}
+		for tid, lev in pairs(self.talents) do
+			local t = self:getTalentFromId(tid)
+			if t and not self.talents_cd[tid] and t.mode == "activated" and not t.innate and util.getval(t.no_energy, self, t) ~= true then tids[#tids+1] = t end
+		end
+		for i = 1, 3 do
+			local t = rng.tableRemove(tids)
+			if not t then break end
+			self:startTalentCooldown(t.id, 1) -- Just set cooldown to 1 since cooldown does not decrease while stunned
+		end
+		
+		eff.res = self:addTemporaryValue("resists", {all=-25})
+		
+	end,
+	deactivate = function(self, eff)
+		self:removeTemporaryValue("stunned", eff.tmpid)
+		self:removeTemporaryValue("no_talents_cooldown", eff.tcdid)
+		self:removeTemporaryValue("movement_speed", eff.speedid)
+		self:removeTemporaryValue("resists", eff.res)
+	end,
+}

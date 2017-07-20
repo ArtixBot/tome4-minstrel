@@ -74,6 +74,10 @@ newEffect{
 		
 		eff.armorhard = self:addTemporaryValue("combat_armor_hardiness", 100)
 		eff.threshold = self:effectTemporaryValue(eff, "die_at", -eff.heroism)
+		self:effectTemporaryValue(eff, "stun_immune", 100)
+		self:effectTemporaryValue(eff, "daze_immune", 100)
+		self:effectTemporaryValue(eff, "disease_immune", 100)
+		self:effectTemporaryValue(eff, "poison_immune", 100)
 		self:effectTemporaryValue(eff, "combat_armor", eff.armor)
 		self:effectTemporaryValue(eff, "combat_physresist", eff.power)
 		self:effectTemporaryValue(eff, "combat_spellresist", eff.power)

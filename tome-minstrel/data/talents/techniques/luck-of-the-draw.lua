@@ -158,6 +158,7 @@ newTalent{
 			end
 			
 			-- TODO: there has to be a better way than this...
+			game.logSeen(self, "#STEEL_BLUE#%s invokes the Ace of Hearts, triggering all six effects!#LAST#", self.name:capitalize())
 			self:setEffect(self.EFF_INCIPIENT_HEROISM, t.getStatDur(self, t), {power=t.getStatBoost(self, t)})
 			self:heal(t.getHeal(self, t), self)
 			self:setEffect(self.EFF_REGENERATION, 4, {power = t.getRegen(self, t)})
@@ -167,6 +168,7 @@ newTalent{
 			self:teleportRandom(self.x, self.y, 15, 8)
 			self:setEffect(self.EFF_DAMAGE_SHIELD, t.getShieldDur(self, t), {power=t.getShield(self, t)})
 			self:setEffect(self.EFF_INVULNERABLE, t.getInvDur(self, t), {})
+			
 
 		else
 			-- Ace of Hearts not drawn.
@@ -177,6 +179,7 @@ newTalent{
 			local effs = {}
 			local count = t.getPurge(self, t)
 			
+			game.logSeen(self, "#STEEL_BLUE#%s invokes Incipient Heroism and is cleansed!#LAST#", self.name:capitalize())
 			-- Go through ALL effects (not including 'other' category)
 			for eff_id, p in pairs(self.tmp) do
 				local e = self.tempeffect_def[eff_id]
@@ -195,18 +198,24 @@ newTalent{
 				end
 			end
 			self:setEffect(self.EFF_INCIPIENT_HEROISM, t.getStatDur(self, t), {power=t.getStatBoost(self, t)})
+			
 		elseif randCard == 2 then
+			game.logSeen(self, "#STEEL_BLUE#%s invokes Rapid Recomposition, fixing wounds!#LAST#", self.name:capitalize())
 			self:heal(t.getHeal(self, t), self)
 			self:setEffect(self.EFF_REGENERATION, 4, {power = t.getRegen(self, t)})
 		elseif randCard == 3 then
+			game.logSeen(self, "#STEEL_BLUE#%s invokes Garkul's Wrath and is seized by otherworldy rage!#LAST#", self.name:capitalize())
 			self:setEffect(self.EFF_GARKULS_WRATH, t.getGarDur(self, t), {hp = t.getBonHp(self, t), power = t.getBonDam(self, t), atkspd = t.getBonSpd(self, t), atkres = t.getBonRes(self, t)})
 		elseif randCard == 4 then
+			game.logSeen(self, "#STEEL_BLUE#%s invokes Lucky Star, becoming unnaturally lucky!#LAST#", self.name:capitalize())
 			self:setEffect(self.EFF_LUCKY_STAR, t.getLukDur(self, t), {power = t.getLuk(self, t), crit = t.getBonCrt(self, t), negate = t.getDamRed(self, t)})
 		elseif randCard == 5 then
+			game.logSeen(self, "#STEEL_BLUE#%s invokes Emergency Phasing and teleports!#LAST#", self.name:capitalize())
 			game.level.map:particleEmitter(self.x, self.y, 1, "teleport")
 			self:teleportRandom(self.x, self.y, 15, 8)
 			self:setEffect(self.EFF_DAMAGE_SHIELD, t.getShieldDur(self, t), {power=t.getShield(self, t)})
 		else
+			game.logSeen(self, "#STEEL_BLUE#%s invokes Invulnerability!#LAST#", self.name:capitalize())
 			self:setEffect(self.EFF_INVULNERABLE, t.getInvDur(self, t), {})
 		end
 		
@@ -256,7 +265,7 @@ newTalent{
 	getArmor = function(self, t) return self:combatTalentScale(t, 44, 81, 0.75) end,
 	getPwr = function(self, t) return self:combatTalentScale(t, 21, 50, 0.75) end,
 	-- Za Warudo scaling
-	getBonTurn = function(self, t) return self:combatTalentLimit(t, 1, 2, 5) end,
+	getBonTurn = function(self, t) return self:combatTalentScale(t, 2, 4, 0.75) end,
 	
 	action = function(self, t)
 		randCard = math.random(1, 6)
@@ -264,15 +273,17 @@ newTalent{
 		if randCard == 1 then
 			self:setEffect(self.EFF_INVULNERABLE, 1, {})
 		elseif randCard == 2 then
+			game.logSeen(self, "#STEEL_BLUE#%s invokes Lunar Cloak and becomes invisible!#LAST#", self.name:capitalize())
 			self:setEffect(self.EFF_INVISIBILITY, t.getInvisDur(self, t), {power = t.getInvisPwr(self, t), penalty = 0, false})
 		elseif randCard == 4 then
+			game.logSeen(self, "#STEEL_BLUE#%s invokes Necromutation and morphs into a demilich!#LAST#", self.name:capitalize())
 			self:setEffect(self.EFF_NECROMUTATION, t.getInvisDur(self, t), {heroism = t.getDieAt(self, t), affinity = t.getAffinity(self, t), armor = t.getArmor(self, t), power = t.getPwr(self, t)})	-- Placeholder values!
 		else
+			game.logSeen(self, "#STEEL_BLUE#%s invokes The World, stopping time!#LAST#", self.name:capitalize())
 			game:onTickEnd(function()
 			self.energy.value = self.energy.value + (t.getBonTurn(self, t) * 1000)
 			self:setEffect(self.EFF_TIME_STOP, 1, {power=0})
-			
-			game.logSeen(self, "#STEEL_BLUE#%s has stopped time!#LAST#", self.name:capitalize())
+
 			game:playSoundNear(self, "talents/heal")
 			end)
 		end
@@ -282,18 +293,20 @@ newTalent{
 	info = function(self, t)
 		return ([[Invoke a card from the Deck of Oddities, triggering one of six possible effects.
 		#YELLOW#Connate Summoning#WHITE#
+		
 		#YELLOW#Lunar Cloak#WHITE#
 		Become invisible (power %d) for %d turns. This effect does not confer a damage penalty and allows health regeneration.
 		#YELLOW#Mass Psychoportation#WHITE#
 		#YELLOW#Necromutation#WHITE#
-		Transform into a demilich. For %d turns, global speed is reduced by 50%%, and your healing mod is set to zero. Gain listed bonuses:
-		- You can only die when reaching -%d health.
+		For %d turns, global speed is reduced by 50%%, and your healing mod is set to zero. Gain listed bonuses:
+		- Die only when reaching -%d health.
 		- Gain %d%% cold and darkness damage affinity.
 		- Immunity to poison, diseases, and stuns.
 		- Armor hardiness increases to 100%%, and armor increased by %d.
 		- All saves, Physical Power, Spellpower, and Mindpower increased by %d.
 		This effect cannot be dispelled or removed early.
-		#YELLOW#Sundering Conflagration#WHITE#
+		#YELLOW#Circle of Conflagration#WHITE#
+		Creates a circle of radius X-XX at your feet which lasts XX turns; targets in the circle take XX Sundering Fire damage per turn, reducing Armor by XX.
 		#YELLOW#The World#WHITE#
 		Gain %d turns. Damage is not reduced while time is stopped.
 		
@@ -304,8 +317,10 @@ newTalent{
 }
 
 newTalent{
-	-- While active, mastery of card invocation talents increased. Deactivate to increase this buff for a short period of time.
-	-- STATUS: Partially implemented; sustained effect is working, but need to implement the boost effect (and subsequent debuff).
+	-- While active, mastery of card invocation talents increased. Deactivate to further increase mastery levels for one turn.
+	-- NOTE: Causes some values to overflow and become negative; check and rebalance those values.
+	-- NOTE 2: Increasing the level of this talent to level 3 or 5 while the talent is still active will permanently lower the user's mastery
+	-- of Technique / Card invocation skills once they deactivate the talent. Possible solution: use booleans to monitor status?
 	name = "Ace in the Hole",
 	type = {"technique/luck-of-the-draw", 4},
 	require = techs_dexreq4,
@@ -315,21 +330,46 @@ newTalent{
 	sustain_stamina = 20,
 	tactical = { BUFF = 2 },
 
-	getMasteryUp = function(self, t) return 0.25 end,
+	getMasteryA = function(self, t) return 0.25 end,
+	getMasteryB = function(self, t) return 0.40 end,
+	getMasteryC = function(self, t) return 0.50 end,
 	getBuffMastery = function(self, t) return self:combatTalentScale(t, 1.00, 1.70, 0.75) end,
+	
+	b = false,
+	c = false,
+	
 	activate = function(self, t)
-		return {
-			self:setTalentTypeMastery("technique/luck-of-the-draw", self:getTalentTypeMastery("technique/luck-of-the-draw") + t.getMasteryUp(self, t))
-		}
+		local ret = {}
+
+		if self:getTalentLevelRaw(t) >= 5 then
+			self:setTalentTypeMastery("technique/luck-of-the-draw", self:getTalentTypeMastery("technique/luck-of-the-draw") + t.getMasteryC(self, t))
+			c = true
+		elseif self:getTalentLevelRaw(t) >= 3 then
+			self:setTalentTypeMastery("technique/luck-of-the-draw", self:getTalentTypeMastery("technique/luck-of-the-draw") + t.getMasteryB(self, t))
+			b = true
+		else
+			self:setTalentTypeMastery("technique/luck-of-the-draw", self:getTalentTypeMastery("technique/luck-of-the-draw") + t.getMasteryA(self, t))
+		end
+		
+		return ret
 	end,
 	deactivate = function(self, t, p)
-		self:setTalentTypeMastery("technique/luck-of-the-draw", self:getTalentTypeMastery("technique/luck-of-the-draw") - t.getMasteryUp(self, t))
+		if c == true then
+			self:setTalentTypeMastery("technique/luck-of-the-draw", self:getTalentTypeMastery("technique/luck-of-the-draw") - t.getMasteryC(self, t))
+			c = false
+		elseif b == true then
+			self:setTalentTypeMastery("technique/luck-of-the-draw", self:getTalentTypeMastery("technique/luck-of-the-draw") - t.getMasteryB(self, t))
+			b = false
+		else
+			self:setTalentTypeMastery("technique/luck-of-the-draw", self:getTalentTypeMastery("technique/luck-of-the-draw") - t.getMasteryA(self, t))
+		end
 		return true
 	end,
 	info = function(self, t)
 		return ([[While active, your mastery of Technique / Card invocation skills is increased by +0.25.
-		Deactivating this ability will confer a one-turn buff that increases your mastery of Technique / Card invocation skills by %0.1f.
-		After the buff ends, your mastery of card invocation will be halved for a short period of time.]]):format(
+		
+		At raw talent level 3 this bonus is increased to +0.40.
+		At raw talent level 5 this bonus is increased to +0.50.]]):format(
 		t.getBuffMastery(self, t))
 	end,
 }
