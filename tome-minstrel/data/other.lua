@@ -91,3 +91,17 @@ newEffect{
 		self:removeTemporaryValue("healing_factor", eff.healmod)
 	end,
 }
+
+newEffect{
+	name = "BOLSTERED_PROWESS", image = "effects/bolstering_ballad.png",
+	desc = "Song Booster",
+	long_desc = function(self, eff) return "Next battle ballad is empowered." end,
+	type = "other",
+	subtype = { arcane=true },
+	status = "beneficial",
+	parameters = { },
+	activate = function(self, eff)
+	end,
+	deactivate = function(self, eff)
+	end,
+}

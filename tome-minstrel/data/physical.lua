@@ -172,3 +172,25 @@ newEffect{
 		self:removeTemporaryValue("resists", eff.res)
 	end,
 }
+
+newEffect{
+	name = "BOLSTERING_BALLAD", image = "talents/bolstering_ballad.png",
+	desc = "Bolstered Strength",
+	long_desc = function(self, eff) return ("Mindpower increased by %d, increases all damage dealt and reduces all damage taken by %d%%."):format(eff.mind, eff.power) end,
+	type = "physical",
+	subtype = { morale=true },
+	status = "beneficial",
+	parameters = {mind=10, power=10},
+	on_gain = function(self, err) return "#Target# is bolstered!", "+Bolstered Strength" end,
+	on_lose = function(self, err) return "#Target# is no longer bolstered.", "-Bolstered Strength" end,
+	activate = function (self, eff)
+		eff.min_up = self:addTemporaryValue("combat_mindpower", eff.mind)
+		eff.dam_up = self:addTemporaryValue("inc_damage", {all=eff.power})
+		eff.res_up = self:addTemporaryValue("resists", {all=eff.power})
+	end,
+	deactivate = function(self, eff)
+		self:removeTemporaryValue("combat_mindpower", eff.min_up)
+		self:removeTemporaryValue("inc_damage", eff.dam_up)
+		self:removeTemporaryValue("resists", eff.res_up)
+	end,
+}

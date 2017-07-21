@@ -17,44 +17,41 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
+-- Overall completion: 25%
+	-- Bolstering Ballad: 100%
+	-- Curative Canticle: 0%
+	-- Expression of Endurance: 0%
+	-- Apocalyptic Aria: 0%
+	
 newTalent{
-	name = "test1",
+	-- Temporarily boosts Mindpower, all damage dealt, and all damage resistance, and confers a Song Booster which boosts strength of other ballads.
+	name = "Bolstering Ballad",
 	type = {"technique/battle-ballads", 1},
 	require = techs_req1,
 	points = 5,
-	mode = "sustained",
 	cooldown = 10,
-	sustain_stamina = 40,
+	stamina = 25,
 	tactical = { ATTACKAREA = 3 },
-	getStatIncrease = function(self, t) return math.floor(self:combatTalentSpellDamage(t, 2, 10)) end,
-	activate = function(self, t)
+	getBuffDur = function(self, t) return self:combatTalentLimit(t, 0, 5, 8) end,
+	getMindIncrease = function(self, t) return self:combatTalentScale(t, 18, 41) end,
+	getDamMod = function(self, t) return self:combatTalentScale(t, 12, 24) end,
+	action = function(self, t)
+		self:setEffect(self.EFF_BOLSTERING_BALLAD, t.getBuffDur(self, t), {mind = t.getMindIncrease(self, t), power = t.getDamMod(self, t)})
+		self:setEffect(self.EFF_BOLSTERED_PROWESS, t.getBuffDur(self, t) - 3, {})
 		game:playSoundNear(self, "talents/spell_generic")
-		local power = t.getStatIncrease(self, t)
-		return {
-			stats = self:addTemporaryValue("inc_stats", {
-				[self.STAT_STR] = power,
-				[self.STAT_DEX] = power,
-				[self.STAT_MAG] = power,
-				[self.STAT_WIL] = power,
-				[self.STAT_CUN] = power,
-				[self.STAT_CON] = power,
-			}),
-		}
-	end,
-	deactivate = function(self, t, p)
-		self:removeTemporaryValue("inc_stats", p.stats)
 		return true
 	end,
 	info = function(self, t)
-		local statinc = t.getStatIncrease(self, t)
-		return ([[Disrupt the tempo of adjacent enemies with deadly song, dealing XX damage and inflicting Tempo Disruption on hit targets.
-		An enemy afflicted by Tempo Disruption will first be globally slowed by 20%% for XX turns, then confused (25%% strength) for XX turns, and finally stunned for XX turns.
-		Damage increases with Mindpower.]])
+		return ([[Strengthen yourself with a hearty song, increasing all damage dealt and reducing all damage you take by %d%%, and increases Mindpower by %d for %d turns.
+		Using this ability will also activate a #YELLOW#Song Booster#WHITE# for %d turns, which is consumed to empower your next 'Battle Ballad' skill.]]):
+		format(t.getDamMod(self, t), t.getMindIncrease(self, t), t.getBuffDur(self, t), t.getBuffDur(self, t) - 3)
 	end,
 }
 
 newTalent{
-	name = "Curative Canticle",
+	-- Conal attack that deals physical damage and disarms hit targets.
+	-- Empowered: Applies a negative physical effect which slows and confuses while active, and deals significant damage when effect expires.
+	name = "Armsbreaking Aria",
 	type = {"technique/battle-ballads", 2},
 	require = techs_req2,
 	no_energy = true,
@@ -94,13 +91,16 @@ newTalent{
 		return true
 	end,
 	info = function(self, t)
-		return ([[The user magically taps into their sustained powers, siphoning off a portion of the energy to restore the user's stamina.
-		Increases stamina regen by %0.2f per active sustain. Turning this talent on does not take a turn.]]):format(t.getStaminaMultiplier(self,t))
+		return ([[A striking solo shatters the thoughts of foes, dealing XX physical damage and disarming hit targets for XX turns. Damage scales with Mindpower.
+		
+		#YELLOW#Empowered:#WHITE# Targets hit will be slowed and confused (XX strength) for XX turns. When this effect wears off, they then take XX additional physical damage.]])
 	end,
 }
 
 newTalent{
-	name = "Expression of Endurance",
+	-- Reduces armor of all enemies within a radius of the user, and gain armor.
+	-- Empowered: Also boosts HP regen, heal mod, and crit reduction.
+	name = "Sonata of Regression",
 	type = {"technique/battle-ballads", 3},
 	require = techs_req3,
 	mode = "sustained",
@@ -133,10 +133,9 @@ newTalent{
 		end
         return {dam=dam}
 	end,
-
 	info = function(self, t)
 		local power = self:getTalentLevel(t) * 2.5
-		return ([[Bolster your resilience, increasing heal mod, crit reduction, Armor, and resistance to physical damage.]])
+		return ([[who knows]])
 	end,
 }
 

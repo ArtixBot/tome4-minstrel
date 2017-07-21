@@ -354,10 +354,10 @@ newTalent{
 		return ret
 	end,
 	deactivate = function(self, t, p)
-		if c == true then
+		if c then
 			self:setTalentTypeMastery("technique/luck-of-the-draw", self:getTalentTypeMastery("technique/luck-of-the-draw") - t.getMasteryC(self, t))
 			c = false
-		elseif b == true then
+		elseif b then
 			self:setTalentTypeMastery("technique/luck-of-the-draw", self:getTalentTypeMastery("technique/luck-of-the-draw") - t.getMasteryB(self, t))
 			b = false
 		else

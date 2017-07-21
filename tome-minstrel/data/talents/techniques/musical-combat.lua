@@ -188,7 +188,7 @@ newTalent{
 		local tg = self:getTalentTarget(t)
 		local x, y, target = self:getTarget(tg)
 		if not target or not self:canProject(tg, x, y) then return nil end
-		local hit = self:attackTarget(target, nil, self:combatTalentWeaponDamage(t, 4.50, 6.50), true)
+		local hit = self:attackTarget(target, nil, self:combatTalentWeaponDamage(t, 4.00, 6.35), true)
 		self:setEffect(self.EFF_FINALE_DEBUFF, 4, {power=0.35, apply_power=10000, no_ct_effect=true})
 		
 		return true
@@ -197,6 +197,6 @@ newTalent{
 		return ([[Finish off your opponent with a singular strike, inflicting %d%% weapon damage.
 		Beware; the sheer power of this attack will temporarily leave you exhausted, slowing down your global speed by 25%% for the next 4 turns.
 		This slow CANNOT be resisted or purged in any way.]]):
-		format(100 * self:combatTalentWeaponDamage(t, 4.00, 6.00))
+		format(100 * self:combatTalentWeaponDamage(t, 4.00, 6.35))
 	end,
 }
