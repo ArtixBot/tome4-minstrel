@@ -17,8 +17,16 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
+-- Overall completion: 0%
+	-- Diatribe of Incapacitation: 0%
+	-- Mockery: 0%
+	-- Enraging Slight: 0%
+	-- ???: 0%
+	
 newTalent{
-	name = "Opening Balladab",
+	-- Drastically reduces all damage dealt by enemies in a area around the user for a short period of time. Cannot be resisted or removed.
+	-- Inflicts a Mental Instability debuff. Dirges performed against enemies with this debuff are Empowered.
+	name = "Diatribe of Incapacitation",
 	type = {"technique/dirges", 1},
 	message = "@Source@ opens with a powerful ballad!",
 	require = techs_dex_req1,
@@ -70,14 +78,16 @@ newTalent{
 		return true
 	end,
 	info = function(self, t)
-		return ([[Open with a sudden strike, dealing 150% weapon damage to target unit.
-		Hit targets are disarmed for 3 turns.
-		Because of the momentum required to execute this manuever, the target must be at least 2 tiles away.]])
+		return ([[Castigate foes in radius XX. Affected units deal XX less damage for XX turns. Application chance scales with Mindpower.
+		This ability applies #RED#Mental Instability#WHITE# for XX turns. Dirges are empowered when performed against targets with Mental Instability (consuming the effect).]])
 	end,
 }
 
 newTalent{
-	name = "Arcane Staminaab",
+	-- For a short period of time, targets deal bonus damage, but cannot use complex talents and have lowered defense and accuracy.
+	-- Affects all units in a radius around the user.
+	-- Empowered: Mockery lasts longer, and affected units cannot perform critical attacks and take additional damage from all sources.
+	name = "Mockery",
 	type = {"technique/dirges", 2},
 	require = techs_req2,
 	no_energy = true,
@@ -117,13 +127,19 @@ newTalent{
 		return true
 	end,
 	info = function(self, t)
-		return ([[The user magically taps into their sustained powers, siphoning off a portion of the energy to restore the user's stamina.
-		Increases stamina regen by %0.2f per active sustain. Turning this talent on does not take a turn.]]):format(t.getStaminaMultiplier(self,t))
+		return ([[Make a mockery of nearby enemies in radius XX, applying Infuriated for XX turns.
+		Infuriated targets deal XX more damage with all attacks, but cannot perform complex abilities and have XX reduced accuracy and defense.
+		The chance to infuriate targets increases with Mindpower.
+		
+		#RED#Empowered:#WHITE# Infuriated's duration is increased by XX turns. Infuriated targets cannot critically hit and take XX additional damage from all sources.]])
 	end,
 }
 
 newTalent{
-	name = "Arcane Armorab",
+	-- Single-target ranged ability which enrages a target, forcing the target in your direction and forcing it to attack you in melee range for a few turns.
+	-- Target takes significantly increased damage from all sources.
+	-- Empowered: Applies Infuration, and forces random talents onto cooldown.
+	name = "Enraging Slight",
 	type = {"technique/dirges", 3},
 	require = techs_req3,
 	mode = "sustained",
@@ -159,13 +175,15 @@ newTalent{
 
 	info = function(self, t)
 		local power = self:getTalentLevel(t) * 2.5
-		return ([[Enchants the user's armor, making it lighter and capable of absorbing damage and converting it to mana.  Reduces fatigue by %d%% and reduces all sources of damage by %d. Restores %d%% of the damage absorbed as mana.
-		Turning this talent on does not take a turn.]]):format(power,t.getDamageReduction(self,t),t.getManaRatio(self,t)*100)
+		return ([[Perform an exceedingly vulgar and taunting manuever against a target, forcing it in your direction and forcing it to attack you for XX turns.
+		While active, the target takes XX increased damage from all sources. Success chance increases with Mindpower.
+		
+		#RED#Empowered:#WHITE# Enraging Slight also applies an empowered Infuriated effect for XX turns and sets XX of the target's talents on cooldown for XX turns.]])
 	end,
 }
 
 newTalent{
-	name = "Martial Magicba", -- no cost; it's main purpose is to give the player an alternative means of using mana/stamina based talents
+	name = "Martial Magicba",
 	type = {"technique/dirges", 4},
 	require = techs_req4,
 	points = 5,

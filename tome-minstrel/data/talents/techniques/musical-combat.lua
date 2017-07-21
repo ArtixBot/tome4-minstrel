@@ -174,13 +174,14 @@ newTalent{
 }
 
 newTalent{
-	--Incredibly powerful strike, but high cooldown and slows user.
+	--Incredibly powerful strike. Fixed cooldown, slows user.
 	name = "Finale",
 	type = {"technique/musical-combat", 4},
 	require = techs_req4,
 	points = 5,
 	cooldown = 20,
-	stamina = 40,
+	stamina = 50,
+	fixed_cooldown = true,
 	requires_target = true,
 	is_melee = true,
 	target = function(self, t) return {type="hit", range=self:getTalentRange(t)} end,

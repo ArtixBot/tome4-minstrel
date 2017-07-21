@@ -20,7 +20,7 @@
 -- Physical combat for Minstrel
 newTalentType{ allow_random=true, type="technique/musical-combat", name = "musical combat", description = "Act in line with the melody of battle." }
 newTalentType{ allow_random=true, type="technique/battle-ballads", name = "battle ballads", description = "Bolster combat prowess." }
-newTalentType{ allow_random=true, type="technique/dirges", name = "dirges", description = "Debuff foes with dolorous dirges." }
+newTalentType{ allow_random=true, type="technique/dirges", name = "dirges", description = "Debuff and infuriate foes with castigating wit." }
 newTalentType{ allow_random=true, type="technique/luck-of-the-draw", min_lev = 10, name = "card invocation", description = "Perform a variety of actions, all bound by one's luck of the draw..." }
 newTalentType{ allow_random=true, type="technique/performance-arts", name = "performance arts", generic = true, description = "Prepare oneself for the performance of a lifetime!" }
 
