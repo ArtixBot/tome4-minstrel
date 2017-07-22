@@ -96,7 +96,7 @@ newTalent{
 	cooldown = 50,
 	tactical = { BUFF = 2 },
 	fixed_cooldown = true,
-	getTalentCount = function(self, t) return math.floor(self:combatTalentScale(t, 1, 5, "log")) end,
+	getTalentCount = function(self, t) return math.floor(self:combatTalentScale(t, 1, 3, "log")) end,
 	getMaxLevel = function(self, t) return self:getTalentLevel(t) end,
 	getBonusDef = function(self, t) return math.floor(self:combatTalentMindDamage(t, 12, 60)) end,
 	getBonusResist = function(self, t) return math.floor(self:combatTalentMindDamage(t, 10, 40)) end,
@@ -125,7 +125,7 @@ newTalent{
 	end,
 	info = function(self, t)
 		return ([[Any minstrel worth their salt possesses the quick thinking needed for unorthodox solutions to abnormal problems.
-		Resets the cooldown of up to %d techniques of tier %d or less, and confers +%d defense and %d%% additional resistance to all damage for %d rounds.
+		Resets the cooldown of up to %d technique(s) of tier %d or less, and confers +%d defense and %d%% additional resistance to all damage for %d rounds.
 		The defense and resistance bonuses will increase with your Mindpower.]]):
 		format(t.getTalentCount(self, t), t.getMaxLevel(self, t), t.getBonusDef(self, t), t.getBonusResist(self, t), t.getDuration(self, t))
 	end,

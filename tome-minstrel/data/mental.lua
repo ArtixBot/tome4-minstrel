@@ -57,3 +57,58 @@ newEffect{
 		self:removeTemporaryValue("resists", eff.resistsId)
 	end,
 }
+
+newEffect{
+	name = "CASTIGATED", image = "talents/diatribe_of_incapacitation.png",
+	desc = "Catigated",
+	long_desc = function(self, eff) return ("This target has been castigated, reducing all damage dealt by %d%%."):format(eff.power) end,
+	type = "mental",
+	subtype = { morale=true },
+	status = "detrimental",
+	parameters = {power = 10},
+	on_gain = function(self, err) return "#Target# is castigated, reducing combat prowess!", "+Castigated" end,
+	on_lose = function(self, err) return "#Target#'s combat prowess is restored.", "-Catigated" end,
+	activate = function(self, eff)
+		eff.dam_pen = self:addTemporaryValue("inc_damage", {all=-eff.power})
+	end,
+	deactivate = function(self, eff)
+		self:removeTemporaryValue("inc_damage", eff.dam_pen)
+	end,
+}
+
+newEffect{
+	name = "MENTAL_INSTABILITY", image = "talents/diatribe_of_incapacitation.png",
+	desc = "Mental Instability",
+	long_desc = function(self, eff) return ("Mentally unstable. Next Wit ability consumes this for additional effects.") end,
+	type = "mental",
+	subtype = { morale=true },
+	status = "detrimental",
+	parameters = {},
+	activate = function(self, eff)
+	end,
+	deactivate = function(self, eff)
+	end,
+}
+
+newEffect{
+	name = "WIT_INFURIATED", image = "talents/mockery.png",
+	desc = "Infuriated",
+	long_desc = function(self, eff) return ("Infuriated! Damage dealt increased by %d%%. Accuracy and defense reduced by %d.\n\n#RED#Exploit#WHITE#: Cannot crit, and all resistances reduced by %d%%."):format(eff.power, eff.reduction, eff.resistdown) end,
+	type = "mental",
+	subtype = { morale=true },
+	status = "detrimental",
+	parameters = {power = 10, reduction = 10, exploit = false, resistdown = 10},
+	on_gain = function(self, err) return "#Target# is infuriated!", "+Infuriated" end,
+	on_lose = function(self, err) return "#Target# calms down.", "-Infuriated" end,
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "inc_damage", {all=eff.power})
+		self:effectTemporaryValue(eff, "combat_atk", -eff.reduction)
+		self:effectTemporaryValue(eff, "combat_def", -eff.reduction)
+		if eff.exploit then
+			self:effectTemporaryValue(eff, "combat_generic_crit", -100)
+			self:effectTemporaryValue(eff, "resists", {all = -eff.resistdown})
+		end
+	end,
+	deactivate = function(self, eff)
+	end,
+}

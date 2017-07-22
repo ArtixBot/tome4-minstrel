@@ -25,120 +25,95 @@
 	
 newTalent{
 	-- Drastically reduces all damage dealt by enemies in a area around the user for a short period of time. Cannot be resisted or removed.
-	-- Inflicts a Mental Instability debuff. Dirges performed against enemies with this debuff are Empowered.
+	-- Inflicts a Mental Instability debuff. Wit abilities exploit mental instability, gaining power.
 	name = "Diatribe of Incapacitation",
 	type = {"technique/wit", 1},
-	message = "@Source@ opens with a powerful ballad!",
 	require = techs_dex_req1,
 	points = 5,
-	random_ego = "attack",
-	stamina = 22,
-	cooldown = function(self, t) return math.ceil(self:combatTalentLimit(t, 0, 8, 4)) end, --Limit to >0
-	tactical = { ATTACK = { weapon = 1, stun = 1 }, CLOSEIN = 3 },
-	requires_target = true,
-	is_melee = true,
-	target = function(self, t) return {type="bolt", range=self:getTalentRange(t), nolock=true, nowarning=true, requires_knowledge=false, stop__block=true} end,
-	range = function(self, t) return math.floor(self:combatTalentScale(t, 2, 6)) end,
-	on_pre_use = function(self, t)
-		if self:attr("never_move") then return false end
-		return true
+	stamina = 25,
+	cooldown = 12,
+	range = 0,
+	radius = function(self, t) return math.floor(self:combatTalentScale(t, 3.5, 5.5)) end,
+	tactical = { DISABLE = 3 },
+	getDamRed = function (self, t) return self:combatTalentScale(t, 43, 81) end,
+	getDur = function (self, t) return math.floor(self:combatTalentScale(t, 3, 5)) end,
+	target = function(self, t)
+		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), selffire=false, talent=t}
 	end,
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
-		local x, y, target = self:getTarget(tg)
-		if not self:canProject(tg, x, y) then return nil end
-		local block_actor = function(_, bx, by) return game.level.map:checkEntity(bx, by, Map.TERRAIN, "block_move", self) end
-		local linestep = self:lineFOV(x, y, block_actor)
-
-		local tx, ty, lx, ly, is_corner_blocked
-		repeat  -- make sure each tile is passable
-			tx, ty = lx, ly
-			lx, ly, is_corner_blocked = linestep:step()
-		until is_corner_blocked or not lx or not ly or game.level.map:checkAllEntities(lx, ly, "block_move", self)
-		if not tx or core.fov.distance(self.x, self.y, tx, ty) < 1 then
-			game.logPlayer(self, "Target enemy is too close to strike!")
-			return
-		end
-		if not tx or not ty or core.fov.distance(x, y, tx, ty) > 1 then return nil end
-
-		local ox, oy = self.x, self.y
-		self:move(tx, ty, true)
-		if config.settings.tome.smooth_move > 0 then
-			self:resetMoveAnim()
-			self:setMoveAnim(ox, oy, 8, 5)
-		end
-		-- Attack ?
-		if target and core.fov.distance(self.x, self.y, target.x, target.y) <= 1 then
-			if self:attackTarget(target, nil, 1.5, true) and target:canBe("stun") then
-				-- On hit, disarms target.
-				target:setEffect(target.DISARMED, 3, {})
-			end
-		end
-
+		
+		self:project(tg, self.x, self.y, function(px, py)
+			local target = game.level.map(px, py, Map.ACTOR)
+			if not target then return end
+			target:setEffect(target.EFF_CASTIGATED, t.getDur(self, t), {power = t.getDamRed(self, t), apply_power=self:combatMindpower()})
+			target:setEffect(target.EFF_MENTAL_INSTABILITY, t.getDur(self, t) - 2, {apply_power=self:combatMindpower()})
+		end)
+		
+		game.level.map:particleEmitter(self.x, self.y, 1, "shout", {size=4, distorion_factor=0.6, radius=self:getTalentRadius(t), life=30, nb_circles=4, rm=0.6, rM=0.6, gm=0.6, gM=0.6, bm=1, bM=1, am=0.6, aM=0.8})
 		return true
 	end,
 	info = function(self, t)
-		return ([[Castigate foes in radius XX. Affected units deal XX less damage for XX turns. Application chance scales with Mindpower.
-		This ability applies #RED#Mental Instability#WHITE# for XX turns. Dirges are empowered when performed against targets with Mental Instability (consuming the effect).]])
+		local radius = self:getTalentRadius(t)
+		return ([[Castigate foes within a radius of %d tiles. Affected units deal %d%% less damage for %d turns. Application chance scales with Mindpower.
+		This ability applies #RED#Mental Instability#WHITE# for %d turns. Wit abilities exploit Mental Instability, consuming the effect to gain increased power.]]):
+		format(radius, t.getDamRed(self, t), t.getDur(self, t), t.getDur(self, t) - 2)
 	end,
 }
 
 newTalent{
-	-- For a short period of time, targets deal bonus damage, but cannot use complex talents and have lowered defense and accuracy.
+	-- For a short period of time, targets deal bonus damage but have lowered defense and accuracy.
 	-- Affects all units in a radius around the user.
 	-- Empowered: Mockery lasts longer, and affected units cannot perform critical attacks and take additional damage from all sources.
 	name = "Mockery",
 	type = {"technique/wit", 2},
-	require = techs_req2,
-	no_energy = true,
-	sustain_mana = 20,
-	mode = "sustained",
-	tactical = { BUFF = 2, Stamina = 1 },
+	require = techs_dex_req2,
 	points = 5,
-	cooldown = 5,
-	getStaminaMultiplier = function(self,t) return self:combatTalentScale(t, 0.1, 0.5, 0.75) end,
-	get_stamina_regen = function(self,t)
-		local sustain_count = 0
-
-		for tid, act in pairs(self.sustain_talents) do
-			sustain_count = sustain_count + 1
-		end
-		return (sustain_count * t.getStaminaMultiplier(self,t))
+	stamina = 25,
+	cooldown = 12,
+	range = 0,
+	radius = function(self, t) return math.floor(self:combatTalentScale(t, 3.5, 5.5)) end,
+	tactical = { DISABLE = 3 },
+	getDamBon = function (self, t) return 15 end,
+	getDebuff = function (self, t) return self:combatTalentScale(t, 14, 38) end,
+	getResDeb = function(self, t) return self:combatTalentScale(t, 20, 30) end,
+	getDur = function (self, t) return math.floor(self:combatTalentScale(t, 3, 5)) end,
+	target = function(self, t)
+		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), selffire=false, talent=t}
 	end,
-	activate = function(self, t)
-		local sustain_count = 1
-
-		for tid, act in pairs(self.sustain_talents) do
-			sustain_count = sustain_count + 1
-		end
-		self.stamina_regen = self.stamina_regen + (sustain_count  * t.getStaminaMultiplier(self,t))
-		return {
-			stam = self:addTemporaryValue("arcane_stamina_mult", t.getStaminaMultiplier(self,t))
-		}
-	end,
-	deactivate = function(self, t, p)
-		local sustain_count = 0
-
-		for tid, act in pairs(self.sustain_talents) do
-			sustain_count = sustain_count + 1
-		end
-		self.stamina_regen = self.stamina_regen - (sustain_count * self:attr("arcane_stamina_mult"))
-		self:removeTemporaryValue("arcane_stamina_mult", p.stam)
+	action = function(self, t)
+		local tg = self:getTalentTarget(t)
+		
+		self:project(tg, self.x, self.y, function(px, py)
+			local target = game.level.map(px, py, Map.ACTOR)
+			if not target then return end
+			if target:hasEffect(target.EFF_MENTAL_INSTABILITY) then
+				game.logSeen(self, "#STEEL_BLUE#%s exploits the target's mental instability!#LAST#", self.name:capitalize())
+				target:removeEffect(target.EFF_MENTAL_INSTABILITY)
+				target:setEffect(target.EFF_WIT_INFURIATED, t.getDur(self, t)+3, {power = t.getDamBon(self, t), reduction = t.getDebuff(self, t), exploit = true, resistdown = t.getResDeb(self, t), apply_power=self:combatMindpower()})
+			else
+				target:setEffect(target.EFF_WIT_INFURIATED, t.getDur(self, t), {power = t.getDamBon(self, t), reduction = t.getDebuff(self, t), resistdown = t.getResDeb(self, t), apply_power=self:combatMindpower()})
+			end
+		end)
+		
+		game.level.map:particleEmitter(self.x, self.y, 1, "shout", {size=4, distorion_factor=0.6, radius=self:getTalentRadius(t), life=30, nb_circles=4, rm=0.6, rM=0.6, gm=0.6, gM=0.6, bm=1, bM=1, am=0.6, aM=0.8})
 		return true
 	end,
 	info = function(self, t)
-		return ([[Make a mockery of nearby enemies in radius XX, applying Infuriated for XX turns.
-		Infuriated targets deal XX more damage with all attacks, but cannot perform complex abilities and have XX reduced accuracy and defense.
+		local radius = self:getTalentRadius(t)
+		return ([[Make a mockery of nearby enemies in radius %d, applying Infuriated for %d turns.
+		Infuriated targets deal 15%% more damage with all attacks, but have %d reduced accuracy and defense.
 		The chance to infuriate targets increases with Mindpower.
 		
-		#RED#Empowered:#WHITE# Infuriated's duration is increased by XX turns. Infuriated targets cannot critically hit and take XX additional damage from all sources.]])
+		#RED#Exploit:#WHITE# Infuriated's duration is increased by 3 turns. Infuriated targets cannot critically hit and have all resistances reduced by %d%%.]]):
+		format(radius, t.getDur(self, t), t.getDebuff(self, t), t.getResDeb(self, t))
 	end,
 }
 
 newTalent{
 	-- Single-target ranged ability which enrages a target, forcing the target in your direction and forcing it to attack you in melee range for a few turns.
 	-- Target takes significantly increased damage from all sources.
-	-- Empowered: Applies Infuration, and forces random talents onto cooldown.
+	-- Empowered: Applies empowered Infuration, and forces random talents onto cooldown.
 	name = "Enraging Slight",
 	type = {"technique/wit", 3},
 	require = techs_req3,
@@ -178,13 +153,13 @@ newTalent{
 		return ([[Perform an exceedingly vulgar and taunting manuever against a target, forcing it in your direction and forcing it to attack you for XX turns.
 		While active, the target takes XX increased damage from all sources. Success chance increases with Mindpower.
 		
-		#RED#Empowered:#WHITE# Enraging Slight also applies an empowered Infuriated effect for XX turns and sets XX of the target's talents on cooldown for XX turns.]])
+		#RED#Exploit:#WHITE# Enraging Slight also applies an empowered Infuriated effect for XX turns and sets XX of the target's talents on cooldown for XX turns.]])
 	end,
 }
 
 newTalent{
-	-- Affects all Infuriated nearby enemies around the user, stunning them and dealing damage.
-	-- Empowered: Deal extra damage to all Infuriated enemies, and inflict confusion, pinning, and silence.
+	-- Has little to no effect on enemies not marked by Mental Instability. May brainlock targets with bonus chance to apply.
+	-- Empowered: Inflict physical damage, and apply stun, pin, silence, and confusion.
 	name = "Exploit Instability",
 	type = {"technique/wit", 4},
 	require = techs_req4,
@@ -219,9 +194,8 @@ newTalent{
 	info = function(self, t)
 		local duration = t.getDuration(self, t)
 		return ([[Exploit the mental state of enemies within XX tiles with a disconcerting cry.
-		Enemies caught in the area of effect are Brainlocked for XX turns.
-		Enemies suffering from Infuriated instead take XX physical damage and are stunned for XX turns.
+		Enemies caught in the area of effect may be Brainlocked. Chance to apply is dependent on Mindpower.
 		
-		#RED#Empowered:#WHITE# Enemies suffering from Infuriated take XX additional physical damage, and are stunned, confused, and pinned for XX turns.]])
+		#RED#Exploit:#WHITE# Targets take XX physical damage, and are stunned, confused, silenced, and pinned for XX turns.]])
 	end,
 }
