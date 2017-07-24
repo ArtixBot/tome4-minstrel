@@ -112,7 +112,7 @@ newTalent{
 	
 	-- Incipient Heroism scaling
 	getPurge = function(self, t) return math.floor(self:combatTalentScale(t, 1, 3, "log")) end,
-	getStatBoost = function(self, t) return self:combatTalentScale(t, 4, 17, 0.75) end,
+	getStatBoost = function(self, t) return self:combatTalentScale(t, 4, 17, 0.75) + 10 end,	--At least +10 to all stats.
 	getStatDur = function(self, t) return self:combatTalentScale(t, 5, 8, 0.75) end,
 	-- Rapid Recomposition scaling
 	getHeal = function(self, t) return self:combatTalentMindDamage(t, 25, 300) end,

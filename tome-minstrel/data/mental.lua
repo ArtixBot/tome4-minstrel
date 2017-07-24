@@ -60,7 +60,7 @@ newEffect{
 
 newEffect{
 	name = "CASTIGATED", image = "talents/diatribe_of_incapacitation.png",
-	desc = "Catigated",
+	desc = "Castigated",
 	long_desc = function(self, eff) return ("This target has been castigated, reducing all damage dealt by %d%%."):format(eff.power) end,
 	type = "mental",
 	subtype = { morale=true },
