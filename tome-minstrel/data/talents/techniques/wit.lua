@@ -111,71 +111,35 @@ newTalent{
 }
 
 newTalent{
-	-- Single-target ranged ability which forces target to melee range (if possible) and causing next melee attack to deal 200% damage.
+	-- Single-target ranged ability which enrages a target, forcing the target in your direction and forcing it to attack you in melee range for a few turns.
+	-- Target takes significantly increased damage from all sources.
 	-- Empowered: Applies empowered Infuration, and forces random talents onto cooldown.
 	name = "Enraging Slight",
 	type = {"technique/wit", 3},
 	require = techs_req3,
 	points = 5,
 	cooldown = 10,
-	stamina = 12,
+	stamina = 18,
 	range = function(self, t) return math.floor(self:combatTalentScale(t, 5.5, 8.5)) end,
 	tactical = { DISABLE = 2 },
-	target = function(self, t) return {type="hit", range=self:getTalentRange(t), talent=t} end,
-	requires_target = true,
-	getDur = function (self, t) return math.floor(self:combatTalentScale(t, 3, 5)) end,
-	getTalentCount = function(self, t)	return 3 + math.floor(self:combatTalentLimit(t, 4, 1, 3)) end,
-	getCooldown = function(self, t) return math.floor(self:combatTalentScale(t, 2.5, 4.5)) end,
+	target = function(self, t) return {type = "bolt", range = self:getTalentRange(t), talent = t } end,
 	action = function(self, t)
-		local tg = self:getTalentTarget(t)
-		local x, y = self:getTarget(tg)
-		if not x or not y then return nil end
-		local _ _, x, y = self:canProject(tg, x, y)
-		local target = game.level.map(x, y, engine.Map.ACTOR)
-		if not target then
-			game.logPlayer(self, "Target out of range!")
-			return
-		end
-		target:pull(self.x, self.y, tg.range)
-		target:setEffect(target.EFF_COUNTERSTRIKE, 1, {power = 0, nb = 1})
-		
-		-- Exploit effect.
-		if target:hasEffect(target.EFF_MENTAL_INSTABILITY) then
-			game.logSeen(self, "#STEEL_BLUE#%s exploits the target's mental instability!#LAST#", self.name:capitalize())
-			target:removeEffect(target.EFF_MENTAL_INSTABILITY)
-			target:setEffect(target.EFF_WIT_INFURIATED, t.getDur(self, t), {power = 10, reduction = 75, exploit = true, resistdown = 50, apply_power=self:combatMindpower()})
-			
-			local tids = {}
-			for tid, lev in pairs(target.talents) do
-				local t = target:getTalentFromId(tid)
-				if t and not target.talents_cd[tid] and t.mode == "activated" and not t.innate then tids[#tids+1] = t end
-			end
-
-			local cdr = t.getCooldown(self, t)
-
-			for i = 1, t.getTalentCount(self, t) do
-				local t = rng.tableRemove(tids)
-				if not t then break end
-				target.talents_cd[t.id] = cdr
-				game.logSeen(target, "%s's %s is disrupted by Enraging Slight!", target.name:capitalize(), t.name)
-			end
-		end
+	
 		return true
 	end,
 
 	info = function(self, t)
 		local power = self:getTalentLevel(t) * 2.5
-		return ([[Perform an exceedingly vulgar manuever against a target, forcing it into melee range if possible and causing the next melee attack to deal 200%% damage.
+		return ([[Perform an exceedingly vulgar and taunting manuever against a target, forcing it in your direction and forcing it to attack you for XX turns.
+		While active, the target takes XX increased damage from all sources. Success chance increases with Mindpower.
 		
-		#RED#Exploit:#WHITE# Enraging Slight applies a special Infuriated effect for %d turns and sets %d of the target's talents on cooldown for %d turns.
-		This Infuriated effect only increases damage dealt by 10%%, reduces defense and accuracy by 75, and cuts all resistances by 50%%.]]):
-		format(t.getDur(self, t), t.getTalentCount(self, t), t.getCooldown(self, t))
+		#RED#Exploit:#WHITE# Enraging Slight also applies an exploited Infuriated effect for XX turns and sets XX of the target's talents on cooldown for XX turns.]])
 	end,
 }
 
 newTalent{
 	-- Has no effect against enemies unaffected by Mental Instability.
-	-- Empowered: Inflict physical damage. Apply stun, pin, silence, and confusion (possibly more effects?).
+	-- Empowered: Inflict physical damage, and apply stun, pin, silence, and confusion.
 	name = "Exploit Instability",
 	type = {"technique/wit", 4},
 	require = techs_dex_req4,
@@ -185,7 +149,7 @@ newTalent{
 	range = 0,
 	radius = function(self, t) return math.floor(self:combatTalentScale(t, 1.5, 3.5)) end,
 	tactical = { DISABLE = 3 },
-	getDam = function(self, t) return self:combatTalentMindDamage(t, 267, 500) + 50 end,
+	getDam = function(self, t) return self:combatTalentMindDamage(t, 267, 500) end,
 	getDur = function (self, t) return math.floor(self:combatTalentScale(t, 3, 5)) end,
 	target = function(self, t)
 		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), selffire=false, talent=t}
