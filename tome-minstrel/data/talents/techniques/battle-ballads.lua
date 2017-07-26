@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009, 2010, 2011 Nicolas Casalini
+-- Copyright (C) 2009 - 2017 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -17,34 +17,176 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
--- Overall completion: 25%
-	-- Bolstering Ballad: 100%
+-- Overall completion: 0%
+	-- Balladeer: 0%
+		-- Core: 50%
+		-- Ballad of Precision: 100%
+		-- Ballad of Revivification: 100%
+		-- Ballad of Celerity: 100%
 	-- Curative Canticle: 0%
 	-- Expression of Endurance: 0%
 	-- Apocalyptic Aria: 0%
-	
+
+-- Balladeer Skills
+
 newTalent{
-	-- Temporarily boosts Mindpower, all damage dealt, and all damage resistance, and confers a Song Booster which boosts strength of other ballads.
-	name = "Bolstering Ballad",
-	type = {"technique/battle-ballads", 1},
+	-- Increases critical hit rate and critical damage.
+	name = "Ballad of Precision",
+	type = {"technique/battle-ballads-battle-ballads", 1},
+	mode = "sustained",
+	hide = true,
 	require = techs_req1,
 	points = 5,
-	cooldown = 10,
-	stamina = 25,
-	tactical = { ATTACKAREA = 3 },
-	getBuffDur = function(self, t) return self:combatTalentLimit(t, 0, 5, 8) end,
-	getMindIncrease = function(self, t) return self:combatTalentScale(t, 18, 41) end,
-	getDamMod = function(self, t) return self:combatTalentScale(t, 12, 24) end,
-	action = function(self, t)
-		self:setEffect(self.EFF_BOLSTERING_BALLAD, t.getBuffDur(self, t), {mind = t.getMindIncrease(self, t), power = t.getDamMod(self, t)})
-		self:setEffect(self.EFF_BOLSTERED_PROWESS, t.getBuffDur(self, t) - 3, {})
-		game:playSoundNear(self, "talents/spell_generic")
+	cooldown = 12,
+	sustain_stamina = 20,
+	tactical = { BUFF = 2 },
+	range = 0,
+	getCritCh = function(self, t) return self:combatTalentMindDamage(t, 9.2, 18.4) end,
+	getCritDam = function(self, t) return self:combatTalentMindDamage(t, 13.5, 26.2) end,
+	sustain_slots = 'balladeer_ballad',
+	activate = function(self, t)
+		game:playSoundNear(self, "talents/spell_generic2")
+
+		local ret = {}
+		self:talentTemporaryValue(ret, "combat_generic_crit", t.getCritCh(self, t))
+		self:talentTemporaryValue(ret, "combat_critical_power", t.getCritDam(self, t))
+		ret.particle = self:addParticles(Particles.new("golden_shield", 1))
+		
+		return ret
+	end,
+	deactivate = function(self, t, p)
+		self:removeParticles(p.particle)
 		return true
 	end,
 	info = function(self, t)
-		return ([[Strengthen yourself with a hearty song, increasing all damage dealt and reducing all damage you take by %d%%, and increases Mindpower by %d for %d turns.
-		Using this ability will also activate a #YELLOW#Song Booster#WHITE# for %d turns, which is consumed to empower your next 'Battle Ballad' skill.]]):
-		format(t.getDamMod(self, t), t.getMindIncrease(self, t), t.getBuffDur(self, t), t.getBuffDur(self, t) - 3)
+		return ([[You sing the Ballad of Precision, increasing your critical hit rate by %0.1f%% and your critical hit damage by %0.1f%%.
+		You may only have one Ballad active at once.
+		Effects increase with Mindpower.]]):
+		format(t.getCritCh(self, t), t.getCritDam(self, t))
+	end,
+}
+
+newTalent{
+	-- Increases healing mod and health regeneration.
+	name = "Ballad of Revivification",
+	type = {"technique/battle-ballads-battle-ballads", 1},
+	mode = "sustained",
+	hide = true,
+	require = techs_req1,
+	points = 5,
+	cooldown = 12,
+	sustain_stamina = 20,
+	tactical = { BUFF = 2 },
+	range = 0,
+	getHealMod = function(self, t) return self:combatTalentMindDamage(t, 0.15, 0.36) end,
+	getHpRegen = function(self, t) return self:combatTalentMindDamage(t, 1.5, 4.0) end,
+	sustain_slots = 'balladeer_ballad',
+	activate = function(self, t)
+		game:playSoundNear(self, "talents/spell_generic2")
+
+		local ret = {}
+		self:talentTemporaryValue(ret, "healing_factor", t.getHealMod(self, t))
+		self:talentTemporaryValue(ret, "life_regen", t.getHpRegen(self, t))
+		ret.particle = self:addParticles(Particles.new("golden_shield", 1))
+		
+		return ret
+	end,
+	deactivate = function(self, t, p)
+		self:removeParticles(p.particle)
+		return true
+	end,
+	info = function(self, t)
+		return ([[You sing the Ballad of Revivification, increasing your healing mod by %0.1f%% and health regeneration by %0.1f.
+		You may only have one Ballad active at once.
+		Effects increase with Mindpower.]]):
+		format(t.getHealMod(self, t)*100, t.getHpRegen(self, t))
+	end,
+}
+
+newTalent{
+	-- Increases movement speed. Provides knockback and pin immunity.
+	name = "Ballad of Celerity",
+	type = {"technique/battle-ballads-battle-ballads", 1},
+	mode = "sustained",
+	hide = true,
+	require = techs_req1,
+	points = 5,
+	cooldown = 12,
+	sustain_stamina = 20,
+	tactical = { BUFF = 2 },
+	range = 0,
+	getMovSpd = function(self, t) return self:combatTalentMindDamage(t, 0.35, 0.56) end,
+	getImmune = function(self, t) return self:combatTalentMindDamage(t, 0.43, 0.71) end,
+	sustain_slots = 'balladeer_ballad',
+	activate = function(self, t)
+		game:playSoundNear(self, "talents/spell_generic2")
+
+		local ret = {}
+		self:talentTemporaryValue(ret, "movement_speed", t.getMovSpd(self, t))
+		self:talentTemporaryValue(ret, "knockback_immune", t.getImmune(self, t))
+		self:talentTemporaryValue(ret, "pin_immune", t.getImmune(self, t))
+		ret.particle = self:addParticles(Particles.new("golden_shield", 1))
+		
+		return ret
+	end,
+	deactivate = function(self, t, p)
+		self:removeParticles(p.particle)
+		return true
+	end,
+	info = function(self, t)
+		return ([[You sing the Ballad of Celerity, increasing your movement speed by %d%% and conferring %d%% knockback and pin immunity.
+		You may only have one Ballad active at once.
+		Effects increase with Mindpower.]]):
+		format(t.getMovSpd(self, t)*100, t.getImmune(self, t)*100)
+	end,
+}
+
+-- Battle Ballad Skills
+
+newTalent{
+	-- Gain access to three different battle ballads, each of which boosts different stats.
+	-- Activating a battle ballad will confer a Song Booster which is consumed to empower subsequent ballads (encourages switching).
+	name = "Balladeer",
+	type = {"technique/battle-ballads", 1},
+	require = techs_req1,
+	points = 5,
+	mode = "passive",
+	passives = function(self, t)
+		self:setTalentTypeMastery("technique/battle-ballads-battle-ballads", self:getTalentMastery(t))
+	end,
+	on_learn = function(self, t)
+		self:learnTalent(self.T_BALLAD_OF_PRECISION, true, nil, {no_unlearn=true})
+		self:learnTalent(self.T_BALLAD_OF_REVIVIFICATION, true, nil, {no_unlearn=true})
+		self:learnTalent(self.T_BALLAD_OF_CELERITY, true, nil, {no_unlearn=true})
+	end,
+	on_unlearn = function(self, t)
+		self:unlearnTalent(self.T_BALLAD_OF_PRECISION)
+		self:unlearnTalent(self.T_BALLAD_OF_REVIVIFICATION)
+		self:unlearnTalent(self.T_BALLAD_OF_CELERITY)
+	end,
+	info = function(self, t)
+		local ret = ""
+		local old1 = self.talents[self.T_BALLAD_OF_PRECISION]
+		local old2 = self.talents[self.T_BALLAD_OF_REVIVIFICATION]
+		local old3 = self.talents[self.T_BALLAD_OF_CELERITY]
+		self.talents[self.T_BALLAD_OF_PRECISION] = (self.talents[t.id] or 0)
+		self.talents[self.T_BALLAD_OF_REVIVIFICATION] = (self.talents[t.id] or 0)
+		self.talents[self.T_BALLAD_OF_CELERITY] = (self.talents[t.id] or 0)
+		pcall(function() -- Be very paranoid, even if some addon or whatever manage to make that crash, we still restore values
+			local t1 = self:getTalentFromId(self.T_BALLAD_OF_PRECISION)
+			local t2 = self:getTalentFromId(self.T_BALLAD_OF_REVIVIFICATION)
+			local t3 = self:getTalentFromId(self.T_BALLAD_OF_CELERITY)
+			ret = ([[As a minstrel, your knowledge of inspiring songs grants you access to three ballads.
+			Ballad of Precision: Increases your critical hit rate by %0.1f%% and critical damage by %0.1f%%.
+			Ballad of Revivification: Increases your healing modifier by %0.1f%% and life regen by %0.1f.
+			Ballad of Celerity: Increases your movement speed by %d%% and grants %d%% knockback and pin immunity.
+			Only one Ballad can be active at a time.]]):
+			format(t1.getCritCh(self, t1), t1.getCritDam(self, t1), t2.getHealMod(self, t2)*100, t2.getHpRegen(self, t2), t3.getMovSpd(self, t3)*100, t3.getImmune(self, t3)*100)
+		end)
+		self.talents[self.T_BALLAD_OF_PRECISION] = old1
+		self.talents[self.T_BALLAD_OF_REVIVIFICATION] = old2
+		self.talents[self.T_BALLAD_OF_CELERITY] = old3
+		return ret
 	end,
 }
 

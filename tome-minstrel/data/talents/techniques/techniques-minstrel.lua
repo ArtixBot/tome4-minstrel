@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009, 2010, 2011 Nicolas Casalini
+-- Copyright (C) 2009 - 2017 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 -- Physical combat for Minstrel
 newTalentType{ allow_random=true, type="technique/musical-combat", name = "musical combat", description = "Act in line with the melody of battle." }
 newTalentType{ allow_random=true, type="technique/battle-ballads", name = "battle ballads", description = "Bolster combat prowess." }
+newTalentType{ allow_random=true, type="technique/battle-ballads-battle-ballads", name = "battle ballads", generic = true, on_mastery_change = function(self, m, tt) if self:knowTalentType("technique/battle-ballads") ~= nil then self.talents_types_mastery[tt] = self.talents_types_mastery["technique/battle-ballads"] end end, description = "Bolster combat prowess." }
 newTalentType{ allow_random=true, type="technique/wit", name = "wit", description = "Debuff and infuriate foes with castigating wit." }
 newTalentType{ allow_random=true, type="technique/luck-of-the-draw", min_lev = 10, name = "card invocation", description = "Perform a variety of actions, all bound by one's luck of the draw..." }
 newTalentType{ allow_random=true, type="technique/performance-arts", name = "performance arts", generic = true, description = "Prepare oneself for the performance of a lifetime!" }

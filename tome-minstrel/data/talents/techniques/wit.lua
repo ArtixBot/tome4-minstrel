@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009, 2010, 2011 Nicolas Casalini
+-- Copyright (C) 2009 - 2017 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -165,7 +165,7 @@ newTalent{
 
 	info = function(self, t)
 		local power = self:getTalentLevel(t) * 2.5
-		return ([[Perform an exceedingly vulgar manuever against a target, forcing it into melee range if possible and causing the next melee attack to deal 200%% damage.
+		return ([[Perform an exceedingly vulgar manuever against a target, forcing it into melee range if possible and causing the next melee attack against the target to deal 200%% damage.
 		
 		#RED#Exploit:#WHITE# Enraging Slight applies a special Infuriated effect for %d turns and sets %d of the target's talents on cooldown for %d turns.
 		This Infuriated effect only increases damage dealt by 10%%, reduces defense and accuracy by 75, and cuts all resistances by 50%%.]]):
