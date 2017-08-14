@@ -59,6 +59,22 @@ newEffect{
 }
 
 newEffect{
+	name = "ACE_OF_SPADES", image = "talents/ace_in_the_hole.png",
+	desc = "Ace of Spades",
+	long_desc = function(self, eff) return "Your next card invocation is significantly more powerful." end,
+	type = "other",
+	subtype = {arcane = true},
+	status = "beneficial",
+	parameters = {},
+	activate = function(self, eff)
+		self:setTalentTypeMastery("technique/luck-of-the-draw", self:getTalentTypeMastery("technique/luck-of-the-draw") + 1.00)
+	end,
+	deactivate = function(self, eff)
+		self:setTalentTypeMastery("technique/luck-of-the-draw", self:getTalentTypeMastery("technique/luck-of-the-draw") - 1.00)
+	end,
+}
+
+newEffect{
 	name = "NECROMUTATION", image = "talents/skeleton.png",
 	desc = "Necromutation",
 	long_desc = function(self, eff) return ("Temporarily mutated into a demilich, reducing global speed by 50%% and negating all healing. The following bonuses are conferred:\n\nDeath threshold: -%d\nCold and Darkness affinity: +%d%%\nArmor: +%d\nSaves and powers: +%d\nArmor hardiness set to 100%%. Poison, disease, and stun immunity."):format(eff.heroism, eff.affinity, eff.armor, eff.power) end,
@@ -89,19 +105,5 @@ newEffect{
 		self:removeTemporaryValue("combat_armor_hardiness", eff.armorhard)
 		self:removeTemporaryValue("global_speed_add", eff.spddown)
 		self:removeTemporaryValue("healing_factor", eff.healmod)
-	end,
-}
-
-newEffect{
-	name = "BOLSTERED_PROWESS", image = "effects/bolstering_ballad.png",
-	desc = "Song Booster",
-	long_desc = function(self, eff) return "Next battle ballad is empowered." end,
-	type = "other",
-	subtype = { arcane=true },
-	status = "beneficial",
-	parameters = { },
-	activate = function(self, eff)
-	end,
-	deactivate = function(self, eff)
 	end,
 }

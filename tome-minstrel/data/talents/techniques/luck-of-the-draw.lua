@@ -265,7 +265,7 @@ newTalent{
 	getArmor = function(self, t) return self:combatTalentScale(t, 44, 81, 0.75) end,
 	getPwr = function(self, t) return self:combatTalentScale(t, 21, 50, 0.75) end,
 	-- Za Warudo scaling
-	getBonTurn = function(self, t) return self:combatTalentScale(t, 2, 4, 0.75) end,
+	getBonTurn = function(self, t) return math.floor(self:combatTalentScale(t, 2, 4, 0.75)) end,
 	
 	action = function(self, t)
 		randCard = math.random(1, 6)
@@ -319,8 +319,6 @@ newTalent{
 newTalent{
 	-- While active, mastery of card invocation talents increased. Deactivate to further increase mastery levels for one turn.
 	-- NOTE: Causes some values to overflow and become negative; check and rebalance those values.
-	-- NOTE 2: Increasing the level of this talent to level 3 or 5 while the talent is still active will permanently lower the user's mastery
-	-- of Technique / Card invocation skills once they deactivate the talent. Possible solution: use booleans to monitor status?
 	name = "Ace in the Hole",
 	type = {"technique/luck-of-the-draw", 4},
 	require = techs_dexreq4,
@@ -333,7 +331,6 @@ newTalent{
 	getMasteryA = function(self, t) return 0.25 end,
 	getMasteryB = function(self, t) return 0.40 end,
 	getMasteryC = function(self, t) return 0.50 end,
-	getBuffMastery = function(self, t) return self:combatTalentScale(t, 1.00, 1.70, 0.75) end,
 	
 	b = false,
 	c = false,
@@ -363,14 +360,16 @@ newTalent{
 		else
 			self:setTalentTypeMastery("technique/luck-of-the-draw", self:getTalentTypeMastery("technique/luck-of-the-draw") - t.getMasteryA(self, t))
 		end
+		game.logSeen(self, "#STEEL_BLUE#%s draws the Ace of Spades, greatly increasing the power of the next card drawn!#LAST#", self.name:capitalize())
+		self:setEffect(self.EFF_ACE_OF_SPADES, 1, {})
 		return true
 	end,
 	info = function(self, t)
 		return ([[While active, your mastery of Technique / Card invocation skills is increased by +0.25.
-		
 		At raw talent level 3 this bonus is increased to +0.40.
-		At raw talent level 5 this bonus is increased to +0.50.]]):format(
-		t.getBuffMastery(self, t))
+		At raw talent level 5 this bonus is increased to +0.50.
+		
+		Deactivate this ability to draw the #GREY#Ace of Spades#WHITE#, which boosts your mastery of Technique / Card invocation skills by +1.00 for 1 turn.]])
 	end,
 }
 

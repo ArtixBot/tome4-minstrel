@@ -174,23 +174,46 @@ newEffect{
 }
 
 newEffect{
-	name = "BOLSTERING_BALLAD", image = "talents/bolstering_ballad.png",
-	desc = "Bolstered Strength",
-	long_desc = function(self, eff) return ("Mindpower increased by %d, increases all damage dealt and reduces all damage taken by %d%%."):format(eff.mind, eff.power) end,
+	name = "GALVANIZING_TUNE", image = "talents/galvanizing_tune.png",
+	desc = "Galvanized",
+	long_desc = function(self, eff) return ("Health and stamina regen increased by %0.1f and %0.1f, respectively."):format(eff.hp, eff.stam) end,
 	type = "physical",
 	subtype = { morale=true },
 	status = "beneficial",
-	parameters = {mind=10, power=10},
-	on_gain = function(self, err) return "#Target# is bolstered!", "+Bolstered Strength" end,
-	on_lose = function(self, err) return "#Target# is no longer bolstered.", "-Bolstered Strength" end,
+	parameters = {hp=10, stam=10},
+	on_gain = function(self, err) return "#Target# is galvanized!", "+Galvanized" end,
+	on_lose = function(self, err) return "#Target# is no longer galvanized.", "-Galvanized" end,
 	activate = function (self, eff)
-		eff.min_up = self:addTemporaryValue("combat_mindpower", eff.mind)
-		eff.dam_up = self:addTemporaryValue("inc_damage", {all=eff.power})
-		eff.res_up = self:addTemporaryValue("resists", {all=eff.power})
+		self:effectTemporaryValue(eff, "life_regen", eff.hp)
+		self:effectTemporaryValue(eff, "stamina_regen", eff.stam)
+	end,
+}
+
+newEffect{
+	name = "GALVANIZING_PRECISION", image = "talents/ballad_of_precision.png",
+	desc = "Precision Boost",
+	long_desc = function(self, eff) return ("Confers +%d armor penetration."):format(eff.apr) end,
+	type = "physical",
+	subtype = { morale=true },
+	status = "beneficial",
+	parameters = {apr=10},
+	activate = function (self, eff)
+		self:effectTemporaryValue(eff, "combat_apr", eff.apr)
+	end,
+}
+
+newEffect{
+	name = "ARIA_HEALDOWN", image = "effects/ballad_of_revivification.png",
+	desc = "Reduced Healing",
+	long_desc = function(self, eff) return ("All healing the target receives is %d%% less effective."):format(eff.power * 100) end,
+	type = "physical",
+	subtype = { morale=true },
+	status = "detrimental",
+	parameters = { power = 0.1 },
+	activate = function(self, eff)
+		eff.heal_down = self:addTemporaryValue("healing_factor", -eff.power)
 	end,
 	deactivate = function(self, eff)
-		self:removeTemporaryValue("combat_mindpower", eff.min_up)
-		self:removeTemporaryValue("inc_damage", eff.dam_up)
-		self:removeTemporaryValue("resists", eff.res_up)
+		self:removeTemporaryValue("healing_factor", eff.heal_down)
 	end,
 }
