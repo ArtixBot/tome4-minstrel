@@ -51,7 +51,7 @@ newEffect{
 }
 
 newEffect{
-	name = "INCIPIENT_HEROISM", image = "talents/dream_crusher.png",
+	name = "INCIPIENT_HEROISM", image = "effects/incipient_heroism.png",
 	desc = "Incipient Heroism",
 	long_desc = function(self, eff) return ("Infused with heroic spirit, boosting all stats by %d."):format(eff.power) end,
 	type = "physical",
@@ -203,7 +203,7 @@ newEffect{
 }
 
 newEffect{
-	name = "DECK_JESTER", image = "talents/deck_of_oddities.png",
+	name = "DECK_JESTER", image = "effects/dodgy.png",
 	desc = "Dodgy",
 	long_desc = function(self, eff) return ("%d%% chance to avoid incoming damage."):format(eff.power) end,
 	type = "physical",
@@ -232,7 +232,7 @@ newEffect{
 }
 
 newEffect{
-	name = "SOLO_PRECISION", image = "talents/ballad_of_precision.png",
+	name = "SOLO_PRECISION", image = "effects/starstriking_precision.png",
 	desc = "Starstriking Precision",
 	long_desc = function(self, eff) return ("Attacks gain +%d%% critical chance and penetrate all armor."):format(eff.power) end,
 	type = "physical",
@@ -246,7 +246,7 @@ newEffect{
 }
 
 newEffect{
-	name = "SOLO_REVIVIFICATION", image = "talents/ballad_of_revivification.png",
+	name = "SOLO_REVIVIFICATION", image = "effects/starstriking_revivification.png",
 	desc = "Starstriking Revivification",
 	long_desc = function(self, eff) return ("+%d%% resistance to all damage, +%d flat damage reduction (before reductions), and immune to bleeds, poisons, and diseases."):format(eff.power, eff.def) end,
 	type = "physical",
@@ -267,7 +267,7 @@ newEffect{
 }
 
 newEffect{
-	name = "SOLO_CELERITY", image = "talents/ballad_of_celerity.png",
+	name = "SOLO_CELERITY", image = "effects/starstriking_celerity.png",
 	desc = "Starstriking Celerity",
 	long_desc = function(self, eff) return ("+%d defense, +%d%% global speed, and immune to stuns, pins, and knockback."):format(eff.power, eff.spd*100) end,
 	type = "physical",

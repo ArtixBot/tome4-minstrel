@@ -17,57 +17,14 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
--- Physical combat for Minstrel
+-- Physical combat for Minstrel (DEX Scaling)
 newTalentType{ allow_random=true, type="technique/musical-combat", name = "musical combat", description = "Act in line with the melody of battle." }
+
+-- Ballads for Minstrel (WIL Scaling)
 newTalentType{ allow_random=true, type="technique/battle-ballads", name = "battle ballads", description = "Bolster combat prowess." }
 newTalentType{ allow_random=true, type="technique/battle-ballads-battle-ballads", name = "battle ballads", generic = true, on_mastery_change = function(self, m, tt) if self:knowTalentType("technique/battle-ballads") ~= nil then self.talents_types_mastery[tt] = self.talents_types_mastery["technique/battle-ballads"] end end, description = "Bolster combat prowess." }
 newTalentType{ allow_random=true, type="technique/wit", name = "wit", description = "Debuff and infuriate foes with castigating wit." }
-newTalentType{ allow_random=true, type="technique/luck-of-the-draw", min_lev = 10, name = "card invocation", description = "Perform a variety of actions, all bound by one's luck of the draw..." }
 newTalentType{ allow_random=true, type="technique/performance-arts", name = "performance arts", generic = true, description = "Prepare oneself for the performance of a lifetime!" }
-
-
--- Generic requires for techs based on talent level
--- Uses STR
-techs_req1 = function(self, t) local stat = "str"; return {
-	stat = { [stat]=function(level) return 12 + (level-1) * 2 end },
-	level = function(level) return 0 + (level-1)  end,
-} end
-techs_req2 = function(self, t) local stat = "str"; return {
-	stat = { [stat]=function(level) return 20 + (level-1) * 2 end },
-	level = function(level) return 4 + (level-1)  end,
-} end
-techs_req3 = function(self, t) local stat = "str"; return {
-	stat = { [stat]=function(level) return 28 + (level-1) * 2 end },
-	level = function(level) return 8 + (level-1)  end,
-} end
-techs_req4 = function(self, t) local stat = "str"; return {
-	stat = { [stat]=function(level) return 36 + (level-1) * 2 end },
-	level = function(level) return 12 + (level-1)  end,
-} end
-techs_req5 = function(self, t) local stat = "str"; return {
-	stat = { [stat]=function(level) return 44 + (level-1) * 2 end },
-	level = function(level) return 16 + (level-1)  end,
-} end
-dex_req_high1 = function(self, t) local stat = "dex"; return {
-	stat = { [stat]=function(level) return 22 + (level-1) * 2 end },
-	level = function(level) return 10 + (level-1)  end,
-} end
-dex_req_high2 = function(self, t) local stat = "dex"; return {
-	stat = { [stat]=function(level) return 30 + (level-1) * 2 end },
-	level = function(level) return 14 + (level-1)  end,
-} end
-dex_req_high3 = function(self, t) local stat = "dex"; return {
-	stat = { [stat]=function(level) return 38 + (level-1) * 2 end },
-	level = function(level) return 18 + (level-1)  end,
-} end
-dex_req_high4 = function(self, t) local stat = "dex"; return {
-	stat = { [stat]=function(level) return 46 + (level-1) * 2 end },
-	level = function(level) return 22 + (level-1)  end,
-} end
-dex_req_high5 = function(self, t) local stat = "dex"; return {
-	stat = { [stat]=function(level) return 54 + (level-1) * 2 end },
-	level = function(level) return 26 + (level-1)  end,
-} end
 
 -- Generic requires for techs_dex based on talent level
 techs_dex_req1 = {
@@ -91,29 +48,49 @@ techs_dex_req5 = {
 	level = function(level) return 16 + (level-1)  end,
 }
 
--- Generic rquires based either on str or dex
-techs_strdex_req1 = function(self, t) local stat = self:getStr() >= self:getDex() and "str" or "dex"; return {
-	stat = { [stat]=function(level) return 12 + (level-1) * 2 end },
+-- Generic requires for techs_wil based on talent level
+techs_wil_req1 = {
+	stat = { wil=function(level) return 12 + (level-1) * 2 end },
 	level = function(level) return 0 + (level-1)  end,
-} end
-techs_strdex_req2 = function(self, t) local stat = self:getStr() >= self:getDex() and "str" or "dex"; return {
-	stat = { [stat]=function(level) return 20 + (level-1) * 2 end },
+}
+techs_wil_req2 = {
+	stat = { wil=function(level) return 20 + (level-1) * 2 end },
 	level = function(level) return 4 + (level-1)  end,
-} end
-techs_strdex_req3 = function(self, t) local stat = self:getStr() >= self:getDex() and "str" or "dex"; return {
-	stat = { [stat]=function(level) return 28 + (level-1) * 2 end },
+}
+techs_wil_req3 = {
+	stat = { wil=function(level) return 28 + (level-1) * 2 end },
 	level = function(level) return 8 + (level-1)  end,
-} end
-techs_strdex_req4 = function(self, t) local stat = self:getStr() >= self:getDex() and "str" or "dex"; return {
-	stat = { [stat]=function(level) return 36 + (level-1) * 2 end },
+}
+techs_wil_req4 = {
+	stat = { wil=function(level) return 36 + (level-1) * 2 end },
 	level = function(level) return 12 + (level-1)  end,
-} end
-techs_strdex_req5 = function(self, t) local stat = self:getStr() >= self:getDex() and "str" or "dex"; return {
-	stat = { [stat]=function(level) return 44 + (level-1) * 2 end },
+}
+techs_wil_req5 = {
+	stat = { wil=function(level) return 44 + (level-1) * 2 end },
 	level = function(level) return 16 + (level-1)  end,
-} end
+}
 
-
+-- Generic requires for techs_cun based on talent level
+techs_cun_req1 = {
+	stat = { cun=function(level) return 12 + (level-1) * 2 end },
+	level = function(level) return 0 + (level-1)  end,
+}
+techs_cun_req2 = {
+	stat = { cun=function(level) return 20 + (level-1) * 2 end },
+	level = function(level) return 4 + (level-1)  end,
+}
+techs_cun_req3 = {
+	stat = { cun=function(level) return 28 + (level-1) * 2 end },
+	level = function(level) return 8 + (level-1)  end,
+}
+techs_cun_req4 = {
+	stat = { cun=function(level) return 36 + (level-1) * 2 end },
+	level = function(level) return 12 + (level-1)  end,
+}
+techs_cun_req5 = {
+	stat = { cun=function(level) return 44 + (level-1) * 2 end },
+	level = function(level) return 16 + (level-1)  end,
+}
 
 
 
@@ -121,6 +98,5 @@ techs_strdex_req5 = function(self, t) local stat = self:getStr() >= self:getDex(
 
 load("/data-minstrel/talents/techniques/musical-combat.lua")
 load("/data-minstrel/talents/techniques/performance-arts.lua")
-load("/data-minstrel/talents/techniques/luck-of-the-draw.lua")
 load("/data-minstrel/talents/techniques/battle-ballads.lua")
 load("/data-minstrel/talents/techniques/wit.lua")

@@ -31,7 +31,7 @@ newTalent{
 	type = {"technique/battle-ballads-battle-ballads", 1},
 	mode = "sustained",
 	hide = true,
-	require = techs_req1,
+	require = techs_wil_req1,
 	points = 5,
 	cooldown = 12,
 	sustain_stamina = 20,
@@ -70,7 +70,7 @@ newTalent{
 	type = {"technique/battle-ballads-battle-ballads", 1},
 	mode = "sustained",
 	hide = true,
-	require = techs_req1,
+	require = techs_wil_req1,
 	points = 5,
 	cooldown = 12,
 	sustain_stamina = 20,
@@ -109,7 +109,7 @@ newTalent{
 	type = {"technique/battle-ballads-battle-ballads", 1},
 	mode = "sustained",
 	hide = true,
-	require = techs_req1,
+	require = techs_wil_req1,
 	points = 5,
 	cooldown = 12,
 	sustain_stamina = 20,
@@ -147,7 +147,7 @@ newTalent{
 	-- Gain access to three different battle ballads, each of which boosts different stats.
 	name = "Balladeer",
 	type = {"technique/battle-ballads", 1},
-	require = techs_req1,
+	require = techs_wil_req1,
 	points = 5,
 	mode = "passive",
 	passives = function(self, t)
@@ -197,7 +197,7 @@ newTalent{
 	-- Celerity boost: Slow targets (same chance as disarm).
 	name = "Armsbreaking Aria",
 	type = {"technique/battle-ballads", 2},
-	require = techs_req_high1,
+	require = techs_wil_req2,
 	points = 5,
 	cooldown = 7,
 	stamina = 20,
@@ -271,7 +271,7 @@ newTalent{
 	-- Celerity boost: Ability is instant.
 	name = "Galvanizing Tune",
 	type = {"technique/battle-ballads", 3},
-	require = techs_req3,
+	require = techs_wil_req3,
 	cooldown = 11,
 	points = 5,
 	no_energy = function(self, t) return self:isTalentActive(self.T_BALLAD_OF_CELERITY) end,
@@ -344,7 +344,7 @@ newTalent{
 newTalent{
 	name = "Starstriking Solo",
 	type = {"technique/battle-ballads", 4},
-	require = techs_req4,
+	require = techs_wil_req4,
 	points = 5,
 	cooldown = 24,
 	range = 0,

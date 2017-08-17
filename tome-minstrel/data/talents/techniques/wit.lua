@@ -28,7 +28,7 @@ newTalent{
 	-- Inflicts a Mental Instability debuff. Wit abilities exploit mental instability, gaining power.
 	name = "Diatribe of Incapacitation",
 	type = {"technique/wit", 1},
-	require = techs_dex_req1,
+	require = techs_wil_req1,
 	points = 5,
 	stamina = 25,
 	cooldown = 12,
@@ -67,7 +67,7 @@ newTalent{
 	-- Empowered: Mockery lasts longer, and affected units cannot perform critical attacks and have reduced resistances.
 	name = "Mockery",
 	type = {"technique/wit", 2},
-	require = techs_dex_req2,
+	require = techs_wil_req2,
 	points = 5,
 	stamina = 25,
 	cooldown = 12,
@@ -115,7 +115,7 @@ newTalent{
 	-- Empowered: Applies empowered Infuration, and forces random talents onto cooldown.
 	name = "Enraging Slight",
 	type = {"technique/wit", 3},
-	require = techs_req3,
+	require = techs_wil_req3,
 	points = 5,
 	cooldown = 10,
 	stamina = 12,
@@ -178,7 +178,7 @@ newTalent{
 	-- Empowered: Inflict physical damage. Apply stun, pin, silence, and confusion (possibly more effects?).
 	name = "Exploit Instability",
 	type = {"technique/wit", 4},
-	require = techs_dex_req4,
+	require = techs_wil_req4,
 	points = 5,
 	stamina = 25,
 	cooldown = 12,

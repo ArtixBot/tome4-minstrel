@@ -17,9 +17,8 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
--- Overall completion: 95%
-	-- Opening Sweep: 80%
-		-- TODO: Disable ability to dash to any tile so long as it is unoccupied.
+-- Overall completion: 100%
+	-- Opening Sweep: 100%
 	-- Symphonic Whirl: 100%
 	-- Cadenza: 100%
 	-- Finale: 100%
@@ -131,7 +130,7 @@ newTalent{
 	--High-damage attack that may disarm and confuse.
 	name = "Cadenza",
 	type = {"technique/musical-combat", 3},
-	require = techs_req3,
+	require = techs_dex_req3,
 	points = 5,
 	cooldown = 12,
 	stamina = 18,
@@ -177,7 +176,7 @@ newTalent{
 	--Incredibly powerful strike. Fixed cooldown, slows user.
 	name = "Finale",
 	type = {"technique/musical-combat", 4},
-	require = techs_req4,
+	require = techs_dex_req4,
 	points = 5,
 	cooldown = 20,
 	stamina = 50,

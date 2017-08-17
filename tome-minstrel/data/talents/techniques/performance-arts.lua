@@ -27,7 +27,7 @@ newTalent{
 	-- While active: +damage, crit%, max stamina, and grants blind-fight, but rapidly drains stamina.
 	name = "Showtime",
 	type = {"technique/performance-arts", 1},
-	require = techs_req1,
+	require = techs_cun_req1,
 	points = 5,
 	mode = "sustained",
 	cooldown = 30,
@@ -69,7 +69,7 @@ newTalent{
 	--Increases silence and confusion immunity.
 	name = "Verbosity",
 	type = {"technique/performance-arts", 2},
-	require = techs_dex_req2,
+	require = techs_cun_req2,
 	points = 5,
 	mode = "passive",
 	getSImmune = function(self, t) return self:combatTalentLimit(t, 5, 0.2, 0.81) end,
@@ -90,7 +90,7 @@ newTalent{
 	-- Resets the cooldown of a random amount of techniques and confers bonus defense and resistance to all damage for a short duration.
 	name = "Moxie",
 	type = {"technique/performance-arts", 3},
-	require = techs_dex_req3,
+	require = techs_cun_req3,
 	points = 5,
 	stamina = 20,
 	cooldown = 50,
@@ -135,7 +135,7 @@ newTalent{
 	-- +Global speed and stam regen. -Fatigue.
 	name = "Virtuoso",
 	type = {"technique/performance-arts", 4},
-	require = techs_dex_req4,
+	require = techs_cun_req4,
 	points = 5,
 	mode = "passive",
 	getSpd = function(self, t) return self:combatTalentScale(t, 0.10, 0.18, 0.75) end,

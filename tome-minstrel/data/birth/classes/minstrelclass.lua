@@ -42,12 +42,12 @@ newBirthDescriptor{
 		["technique/musical-combat"]={true, 0.3},
 		["technique/battle-ballads"]={true, 0.3},
 		["technique/wit"]={true, 0.3},
-		["technique/luck-of-the-draw"]={false, 0.3},
+		["cunning/luck-of-the-draw"]={false, 0.3},
 		["cunning/artifice"]={false, 0.3},
 		
 		-- Generic Skills
 		["technique/combat-training"]={true, 0.3},
-		["technique/performance-arts"]={true, 0},
+		["technique/performance-arts"]={true, 0.3},
 		["technique/mobility"]={true, 0.3},
 		["cunning/survival"]={false, 0.3},
 	},

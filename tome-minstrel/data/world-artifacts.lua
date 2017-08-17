@@ -28,86 +28,60 @@ end
 
 -- This file describes artifacts not bound to a special location, they can be found anywhere
 
-newEntity{ base = "BASE_AMULET",
-	power_source = {technique=true},
+newEntity{ base = "BASE_KNIFE", define_as = "TRICK_LUTE",
+	power_source = {technique=true, nature=true},
 	unique = true,
-	name = "Shattered Songstone", color = colors.WHITE, image = "object/artifact/feathersteel_amulet.png",
-	unided_name = "shattered gray amulet",
-	desc = [[Though seemingly broken beyond repair, this amulet still possesses remnants of its original power.]],
-	level_range = {1, 5},
-	rarity = 20,
-	cost = 50,
-	material_level = 1,
+	name = "Victario's Trick Lute",
+	color = colors.GRAY, image = "object/victario_trick_lute.png",
+	unided_name = "strangely shaped lute",
+	moddable_tile = "special/%s_victarios_trick_lute",
+	moddable_tile_big = true,
+	desc = [[Victario was a famed minstrel whose tales of adventure and heroism entertained thousands in Maj'Eyal. His blessed lute-smaller than most stringed devices-served another purpose as a self-defense weapon to strike down bandits and marauders.]],
+	level_range = {28, 40},
+	rarity = 200,
+	require = { stat = { dex=24, wil=32, cun=32 }, },
+	cost = 350,
+	material_level = 4,
+		combat = {
+		dam = 32,
+		apr = 8,
+		physcrit = 10,
+		dammod = {cun=0.35, str=0.20, dex=0.35},
+		special_on_crit = {desc="plays a power chord, dazing the target", fct=function(combat, who, target)
+			if target:canBe("stun") then
+				local check = math.max(who:combatSpellpower(), who:combatMindpower(), who:combatAttack())
+				target:setEffect(target.EFF_DAZED, 4, {src=who, apply_power=check})
+			end
+		end},
+	},
 	wielder = {
-		inc_stats = { [Stats.STAT_CUN] = 1 },
+		inc_stats = {[Stats.STAT_WIL] = 4, [Stats.STAT_CUN] = 4,},
 		talents_types_mastery = {
+			["technique/battle-ballads"] = 0.1,
 			["technique/performance-arts"] = 0.1,
 		},
 	},
+	max_power = 50, power_regen = 1,
+	use_talent = { id = Talents.T_STARSTRIKING_SOLO, level = 1, power = 50 },
 }
 
 newEntity{ base = "BASE_TOOL_MISC",
-	power_source = {technique=true},
-	unique = true,
-	name = "Dismas's Shameful Locket",		-- Totally not inspired by Darkest Dungeon's Crimson Court expansion.
-	color = colors.GRAY, image = "object/artifact/shield_unsetting_sun.png",
-	unided_name = "weathered locket",
-	desc = [[A weathered locket held by the infamous highwayman Dismas, who fell into despair upon taking the life of an unnamed mother and child. As to why Dismas kept such a powerful reminder of his sins, one can only assume he sought some form of redemption.
-	
-"A reflex - I didn't mean to..."]],
+	power_source = {nature = true},
+	unique=true, rarity=240, image = "object/artifact/honeywood_chalice.png",
+	type = "charm",
+	name = "Victario's Tasting Chalice",
+	unided_name = "tasting chalice",
+	color = colors.BROWN,
 	level_range = {28, 40},
-	rarity = 200,
-	cost = 350,
+	desc = [[In his early days, Victario served as a taster for a duke he considered "scummier than a ship's ratspawn." After one too many near-fatal poisonings by the duke himself, Victario murdered his employer and took the bronze chalice for himself.]],
+	cost = 320,
 	material_level = 4,
 	wielder = {
-		inc_stats = {[Stats.STAT_DEX] = 5},
-		combat_atk=20,
-		combat_apr=20,
-		combat_physcrit=10,
-		combat_critical_power=20,
-		combat_mentalresist=-25,
+		combat_physresist = 15,
+		inc_stats = {[Stats.STAT_WIL] = 8,},
+		inc_damage={[DamageType.POISON] = 18, [DamageType.ACID] = 18},
+		resists={[DamageType.NATURE] = 20,},
+		poison_immune = 0.35,
+		
 	},
-	max_power = 20, power_regen = 1,
-	use_talent = { id = Talents.T_PERFECT_STRIKE, level = 2, power = 20 },
-}
-
-newEntity{ base = "BASE_TOOL_MISC",
-	power_source = {technique=true},
-	unique = true,
-	name = "Jactator's Blowing Horn",
-	color = colors.GRAY, image = "object/artifact/blightstopper.png",
-	unided_name = "overgrown blowing horn",
-	desc = [[Covered in plant matter from decades of idleness, this blowing horn was the prized possession of Jactator, the Ur'kul Mercenary Company's first (and only) standard bearer. Those unfortunate enough to serve with Jactator bemoaned his limitless capacity for chitter-chatter and gossip.]],
-	level_range = {28, 40},
-	rarity = 200,
-	cost = 350,
-	material_level = 4,
-	wielder = {
-		max_stamina = 100,
-		stamina_regen = 5,
-		fatigue = -10,
-	},
-	max_power = 35, power_regen = 1,
-	use_talent = { id = Talents.T_SECOND_WIND, level = 2, power = 25 },
-}
-
-newEntity{ base = "BASE_TOOL_MISC",
-	power_source = {technique=true},
-	unique = true,
-	name = "Bandolier of Cards",
-	color = colors.GRAY, image = "object/artifact/pharao_ash.png",
-	unided_name = "bandolier of cards",
-	desc = [[This bandolier was said to have once been used by Nemelex Xobeh, the (in)famous trickster god. It holds multiple antiquated decks, none of which you are familiar with.]],
-	level_range = {28, 40},
-	rarity = 200,
-	cost = 350,
-	material_level = 4,
-	wielder = {
-		inc_stats = {[Stats.STAT_CUN] = 10},
-		max_stamina = 100,
-		stamina_regen = 5,
-		fatigue = -10,
-	},
-	max_power = 35, power_regen = 1,
-	use_talent = { id = Talents.T_SECOND_WIND, level = 2, power = 25 },
 }

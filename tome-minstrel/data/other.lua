@@ -67,15 +67,15 @@ newEffect{
 	status = "beneficial",
 	parameters = {},
 	activate = function(self, eff)
-		self:setTalentTypeMastery("technique/luck-of-the-draw", self:getTalentTypeMastery("technique/luck-of-the-draw") + 1.00)
+		self:setTalentTypeMastery("cunning/luck-of-the-draw", self:getTalentTypeMastery("cunning/luck-of-the-draw") + 1.00)
 	end,
 	deactivate = function(self, eff)
-		self:setTalentTypeMastery("technique/luck-of-the-draw", self:getTalentTypeMastery("technique/luck-of-the-draw") - 1.00)
+		self:setTalentTypeMastery("cunning/luck-of-the-draw", self:getTalentTypeMastery("cunning/luck-of-the-draw") - 1.00)
 	end,
 }
 
 newEffect{
-	name = "ACE_OF_CLUBS", image = "talents/ace_in_the_hole.png",
+	name = "ACE_OF_CLUBS", image = "effects/ace_of_clubs.png",
 	desc = "Ace of Clubs",
 	long_desc = function(self, eff) return "Ace of Clubs drawn! +250 Luck." end,
 	type = "other",
@@ -127,7 +127,7 @@ newEffect{
 }
 
 newEffect{
-	name = "BULWARK_OF_FAITH", image = "talents/skeleton.png",
+	name = "BULWARK_OF_FAITH", image = "effects/bulwark_of_faith.png",
 	desc = "Bulwark of Faith",
 	long_desc = function(self, eff) return ("Resilience has been enhanced, increasing all resistances by 40% and affinity for physical damage by 25% but rooting you in place.") end,
 	type = "other",
@@ -148,7 +148,7 @@ newEffect{
 }
 
 newEffect{
-	name = "FORTUNES_GAMBIT", image = "talents/skeleton.png",
+	name = "FORTUNES_GAMBIT", image = "talents/lucky_day.png",
 	desc = "Fortune's Gambit",
 	long_desc = function(self, eff) return ("Fortunes have been altered, impacting Luck by %d points."):format(eff.power) end,
 	type = "other",
