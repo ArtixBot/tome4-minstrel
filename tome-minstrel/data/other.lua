@@ -75,6 +75,24 @@ newEffect{
 }
 
 newEffect{
+	name = "ACE_OF_CLUBS", image = "talents/ace_in_the_hole.png",
+	desc = "Ace of Clubs",
+	long_desc = function(self, eff) return "Ace of Clubs drawn! +250 Luck." end,
+	type = "other",
+	subtype = {arcane = true},
+	status = "beneficial",
+	on_gain = function(self, err) return "#Target#'s becomes extraordinarily lucky!", "+Ace of Clubs" end,
+	on_lose = function(self, err) return "#Target#'s luck returns to normal.", "-Ace of Clubs" end,
+	parameters = {},
+	activate = function(self, eff)
+		eff.luk = self:addTemporaryValue("inc_stats", {[Stats.STAT_LCK] = 250,})
+	end,
+	deactivate = function(self, eff)
+		self:removeTemporaryValue("inc_stats", eff.luk)
+	end,
+}
+
+newEffect{
 	name = "NECROMUTATION", image = "talents/skeleton.png",
 	desc = "Necromutation",
 	long_desc = function(self, eff) return ("Temporarily mutated into a demilich, reducing global speed by 50%% and negating all healing. The following bonuses are conferred:\n\nDeath threshold: -%d\nCold and Darkness affinity: +%d%%\nArmor: +%d\nSaves and powers: +%d\nArmor hardiness set to 100%%. Poison, disease, and stun immunity."):format(eff.heroism, eff.affinity, eff.armor, eff.power) end,
@@ -105,5 +123,44 @@ newEffect{
 		self:removeTemporaryValue("combat_armor_hardiness", eff.armorhard)
 		self:removeTemporaryValue("global_speed_add", eff.spddown)
 		self:removeTemporaryValue("healing_factor", eff.healmod)
+	end,
+}
+
+newEffect{
+	name = "BULWARK_OF_FAITH", image = "talents/skeleton.png",
+	desc = "Bulwark of Faith",
+	long_desc = function(self, eff) return ("Resilience has been enhanced, increasing all resistances by 40% and affinity for physical damage by 25% but rooting you in place.") end,
+	type = "other",
+	subtype = { arcane=true },
+	status = "detrimental",
+	parameters = {},
+	on_gain = function(self, err) return "#Target# becomes a bulwark of faith!", "+Bulwark of Faith" end,
+	on_lose = function(self, err) return "#Target# is no longer resilient.", "-Bulwark of Faith" end,
+	activate = function(self, eff)
+		eff.resist = self:addTemporaryValue("resists", {all=40})
+		self:effectTemporaryValue(eff, "damage_affinity", {[DamageType.PHYSICAL]=25})
+		eff.tmpid = self:addTemporaryValue("never_move", 1)
+	end,
+	deactivate = function(self, eff)
+		self:removeTemporaryValue("resists", eff.resist)
+		self:removeTemporaryValue("never_move", eff.tmpid)
+	end,
+}
+
+newEffect{
+	name = "FORTUNES_GAMBIT", image = "talents/skeleton.png",
+	desc = "Fortune's Gambit",
+	long_desc = function(self, eff) return ("Fortunes have been altered, impacting Luck by %d points."):format(eff.power) end,
+	type = "other",
+	subtype = { arcane=true },
+	status = "detrimental",
+	parameters = {},
+	on_gain = function(self, err) return "#Target#'s luck changes!", "+Fortune's Gambit" end,
+	on_lose = function(self, err) return "#Target#'s luck returns to normal.", "-Fortune's Gambit" end,
+	activate = function(self, eff)
+		eff.luk = self:addTemporaryValue("inc_stats", {[Stats.STAT_LCK] = math.floor(eff.power),})
+	end,
+	deactivate = function(self, eff)
+		self:removeTemporaryValue("inc_stats", eff.luk)
 	end,
 }

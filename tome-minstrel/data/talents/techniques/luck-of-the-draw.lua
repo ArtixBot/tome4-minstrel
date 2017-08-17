@@ -17,88 +17,148 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
--- Overall completion: 35%
-	-- Deck of Malevolence: 0%
-	-- Deck of Benevolence: 99% (there exists this mystical thing called 'balance,' but given its mystical nature, I don't know what 'balance' means.)
-		-- TODO: Add message when Ace of Hearts is drawn.
-	-- Deck of Oddities: 40%
-	-- Ace in the Hole: 20%
+-- Overall completion: 100%
+	-- Deck of Malevolence: 100%
+	-- Deck of Benevolence: 100%
+	-- Deck of Oddities: 100%
+	-- Ace in the Hole: 100%
 	
 newTalent{
 	-- Draws 1 of 6 random damaging abilities. Ability power is slightly less compared to Deck of Benevolence (due to reliability concerns).
-	-- 5% chance to draw the deck's joker, dealing massive AoE elemental damage.
-	-- STATUS: Borked up beyond belief, like holy crap; fix this stuff.
+	-- 12.5% to deal massive AoE elemental damage.
 	name = "Deck of Malevolence",
 	type = {"technique/luck-of-the-draw", 1},
-	message = "testmessage",
 	require = techs_dex_req1,
 	points = 5,
-	random_ego = "attack",
-	stamina = 22,
-	getCardDraw = function(self, t) return math.random(1, 6) end,
-	cooldown = function(self, t) return math.ceil(self:combatTalentLimit(t, 0, 6, 4)) end,
-	tactical = { ATTACK = { weapon = 1}, CLOSEIN = 3 },
-	requires_target = true,
-	is_melee = true,
-	getSpeed = function(self, t) return self:combatTalentLimit(t, 1, 0.10, 0.28) end,
-	target = function(self, t) return {type="bolt", range=self:getTalentRange(t), nolock=true, nowarning=true, requires_knowledge=false, stop__block=true} end,
-	range = function(self, t) return math.floor(self:combatTalentScale(t, 3, 5)) end,
-	on_pre_use = function(self, t)
-		if self:attr("never_move") then return false end
-		return true
+	cooldown = 20,
+	fixed_cooldown = true,
+	no_npc_use = true,
+	range = 0,
+	radius = function(self, t) return math.floor(self:combatTalentScale(t, 2.5, 4.5, 0.75)) end,
+	-- Repulsion Blast Scaling
+	getRepulseDam = function(self, t) return self:combatTalentScale(t, 204, 308, 0.75) end,
+	getRepulseDis = function(self, t) return math.floor(self:combatTalentScale(t, 2, 4, 0.75)) end,
+	-- Degrade Scaling
+	getDegenDur = function(self, t) return math.floor(self:combatTalentScale(t, 3.5, 5.5, 0.75)) end,
+	getDegenDam = function(self, t) return self:combatTalentScale(t, 24, 42, 0.75) end,
+	getDegenSpd = function(self, t) return self:combatTalentScale(t, 0.14, 0.24, 0.75) end,
+	getDegenRes = function(self, t) return self:combatTalentScale(t, 19, 34, 0.75) end,
+	-- Terra Lances Scaling
+	getTerraDam = function(self, t) return self:combatTalentScale(t, 51, 84, 0.75) end,
+	getTerraDur = function(self, t) return math.floor(self:combatTalentScale(t, 4.5, 6.5, 0.75)) end,
+	-- Arcane Negation Nova Scaling
+	getNegatDur = function(self, t) return math.floor(self:combatTalentScale(t, 5.5, 8.5, 0.75)) end,
+	-- Temporal Rip Scaling
+	getTempoDam = function(self, t) return self:combatTalentScale(t, 174, 241, 0.75) end,
+	getMaxLevel = function(self, t) return self:getTalentLevel(t) end,
+	getTalentCount = function(self, t) return math.floor(self:combatTalentScale(t, 1, 3, "log")) end,
+	-- Mass Confusion Scaling
+	getConfPow = function(self, t) return self:combatTalentScale(t, 19, 37, 0.75) end,
+	getConfDur = function(self, t) return math.floor(self:combatTalentScale(t, 3.5, 5.5, 0.75))end,
+	-- Ace of Diamonds Scaling
+	getDiamDam = function(self, t) return self:combatTalentScale(t, 211, 342, 0.75) end,
+	tactical = { DISABLE = 3 },
+	target = function(self, t)
+		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), selffire=false, talent=t}
 	end,
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
-		local x, y, target = self:getTarget(tg)
-		if not self:canProject(tg, x, y) then return nil end
-		local block_actor = function(_, bx, by) return game.level.map:checkEntity(bx, by, Map.TERRAIN, "block_move", self) end
-		local linestep = self:lineFOV(x, y, block_actor)
-
-		local tx, ty, lx, ly, is_corner_blocked
-		repeat  -- make sure each tile is passable
-			tx, ty = lx, ly
-			lx, ly, is_corner_blocked = linestep:step()
-		until is_corner_blocked or not lx or not ly or game.level.map:checkAllEntities(lx, ly, "block_move", self)
-		if not tx or core.fov.distance(self.x, self.y, tx, ty) < 1 then
-			game.logPlayer(self, "Target enemy is too close to strike!")
-			return
-		end
-		if not tx or not ty or core.fov.distance(x, y, tx, ty) > 1 then return nil end
-
-		local ox, oy = self.x, self.y
-		self:move(tx, ty, true)
-		if config.settings.tome.smooth_move > 0 then
-			self:resetMoveAnim()
-			self:setMoveAnim(ox, oy, 8, 5)
-		end
-				
-		-- Performs actual attack.
-		if target and core.fov.distance(self.x, self.y, target.x, target.y) <= 1 then
 		
-			if self:attackTarget(target, nil, 1.25, true) then
-				-- On hit, boosts global speed for a short period of time.
-				self:setEffect(self.EFF_SPEED, 2, {power=t.getSpeed(self, t)})
+		-- Check for Ace of Diamonds.
+		randJoker = math.random(1, 8)
+		
+		if randJoker == 1 then
+			game.logSeen(self, "#STEEL_BLUE#%s invokes the Ace of Diamonds!#LAST#", self.name:capitalize())
+			self:project(tg, self.x, self.y, function(px, py)
+				local target = game.level.map(px, py, Map.ACTOR)
+				if not target then return end
+				DamageType:get(DamageType.FIRE).projector(self, px, py, DamageType.FIRE, t.getDiamDam(self, t))
+				DamageType:get(DamageType.COLD).projector(self, px, py, DamageType.COLD, t.getDiamDam(self, t))
+				DamageType:get(DamageType.LIGHTNING).projector(self, px, py, DamageType.LIGHTNING, t.getDiamDam(self, t))
+			end)
+		elseif randJoker ~= 1 then
+			-- If not drawn, then...
+			randCard = math.random(1, 6)
+			-- This is a 'temp' fix to prevent the log from playing these messages multiple times when multiple targets are hit.
+			if randCard == 1 then
+				game.logSeen(self, "#STEEL_BLUE#%s invokes Repulsion Blast!#LAST#", self.name:capitalize())
+			elseif randCard == 2 then
+				game.logSeen(self, "#STEEL_BLUE#%s invokes Degrade!#LAST#", self.name:capitalize())
+			elseif randCard == 3 then
+				game.logSeen(self, "#STEEL_BLUE#%s invokes Terra Lances!#LAST#", self.name:capitalize())
+			elseif randCard == 4 then
+				game.logSeen(self, "#STEEL_BLUE#%s invokes Arcane Negation Nova!#LAST#", self.name:capitalize())
+			elseif randCard == 5 then
+				game.logSeen(self, "#STEEL_BLUE#%s invokes Temporal Rip!#LAST#", self.name:capitalize())
+			elseif randCard == 6 then
+				game.logSeen(self, "#STEEL_BLUE#%s invokes Mass Confusion!#LAST#", self.name:capitalize())
 			end
 		end
-
+		
+		self:project(tg, self.x, self.y, function(px, py)
+			local target = game.level.map(px, py, Map.ACTOR)
+			if not target then return end
+			if randCard == 1 then
+				DamageType:get(DamageType.PHYSICAL).projector(self, px, py, DamageType.PHYSICAL, t.getRepulseDam(self, t))
+				target:knockback(self.x, self.y, t.getRepulseDis(self, t))
+			elseif randCard == 2 then
+				target:setEffect(target.EFF_DECK_DEGENERATION, t.getDegenDur(self, t), {power = t.getDegenDam(self, t), spd = t.getDegenSpd(self, t), res = t.getDegenRes(self, t)})
+			elseif randCard == 3 then
+				target:setEffect(target.EFF_DECK_TERRA, t.getTerraDur(self, t), {power = t.getTerraDam(self, t)})
+			elseif randCard == 4 then
+				target:setEffect(target.EFF_SILENCED, t.getNegatDur(self, t), {})
+				target:setEffect(target.EFF_BRAINLOCKED, t.getNegatDur(self, t), {})
+			elseif randCard == 5 then
+				DamageType:get(DamageType.TEMPORAL).projector(self, px, py, DamageType.TEMPORAL, t.getTempoDam(self, t))
+				local nb = t.getTalentCount(self, t)
+				local maxlev = t.getMaxLevel(self, t)
+				local tids = {}
+				for tid, _ in pairs(self.talents_cd) do
+					local tt = self:getTalentFromId(tid)
+					if not tt.fixed_cooldown then
+						if tt.type[2] <= maxlev and tt.type[1]:find("^technique/") then
+							tids[#tids+1] = tid
+						end
+					end
+				end
+				for i = 1, nb do
+					if #tids == 0 then break end
+					local tid = rng.tableRemove(tids)
+					self.talents_cd[tid] = nil
+				end
+				self.changed = true
+			elseif randCard == 6 then
+				target:setEffect(target.EFF_CONFUSED, t.getConfDur(self, t), {power = t.getConfPow(self, t)})
+			end
+		end)
 		return true
 	end,
 	info = function(self, t)
-		return ([[Invoke a card from the Deck of Malevolence, triggering one of six possible effects.
+		local radius = self:getTalentRadius(t)
+		return ([[Invoke a card from the Deck of Malevolence, triggering one of six possible effects. These effects propagate in a %d-tile radius around the user.
 		#YELLOW#Repulsion Blast#WHITE#
+		Deal %d physical damage to all enemies and knock them back %d tiles.
 		#YELLOW#Degrade#WHITE#
-		#YELLOW#Gravity Spike#WHITE#
-		#YELLOW#Arcane Negation Field#WHITE#
-		#YELLOW#Spellblaze Storm#WHITE#
+		Rapidly degenerate all enemies, reducing their damage by %d%%, global speed by %d%%, and resistance to all damage by %d%% for %d turns.
+		#YELLOW#Terra Lances#WHITE#
+		Earthen spikes pin all enemies to the ground and cause them to bleed for %d physical damage for %d turns.
+		#YELLOW#Arcane Negation Nova#WHITE#
+		All enemies are silenced and brainlocked for %d turns.
+		#YELLOW#Temporal Rip#WHITE#
+		Deals %d temporal damage to all enemies. Reset the cooldown of %d random technique(s) of tier %d or less.
 		#YELLOW#Mass Confusion#WHITE#
+		Confuse (power %d%%) all enemies for %d turns.
 		
-		There is a 10%% chance to draw the #RED#Ace of Diamonds#WHITE#, which deals massive, multi-elemental damage in an area around the user.]])
+		There is a 12.5%% (separate roll) chance to draw the #RED#Ace of Diamonds#WHITE#, which deals %d fire, cold, and lightning damage to all enemies.]]):
+		format(radius, t.getRepulseDam(self, t), t.getRepulseDis(self, t), t.getDegenDam(self, t), t.getDegenSpd(self, t) * 100, t.getDegenRes(self, t), t.getDegenDur(self, t),
+		t.getTerraDam(self, t)*t.getTerraDur(self, t), t.getTerraDur(self, t), t.getNegatDur(self, t), t.getTempoDam(self, t), t.getTalentCount(self, t), t.getMaxLevel(self, t),
+		t.getConfPow(self, t), t.getConfDur(self, t), t.getDiamDam(self, t))
 	end,
 }
 
 newTalent{
 	-- Draws 1 of 6 random beneficial effects. Each effect is very powerful due to the random nature of this talent (as this is more of a defensive talent,
-	-- it's more useful when at low health, but randomness is not the best solution out of a low-health problem). 12.5% chance to be really OP.
+	-- it's more useful when at low health, but randomness is not the best solution out of a low-health problem). 12.5% chance to be more OP then it deserves to be.
 	name = "Deck of Benevolence",
 	type = {"technique/luck-of-the-draw", 2},
 	message = "@Source@ draws from the Deck of Benevolence!",
@@ -107,8 +167,6 @@ newTalent{
 	require = techs_dex_req2,
 	tactical = { BUFF = 2 },
 	fixed_cooldown = true,
-	no_energy = true,
-	no_npc_use = true,
 	
 	-- Incipient Heroism scaling
 	getPurge = function(self, t) return math.floor(self:combatTalentScale(t, 1, 3, "log")) end,
@@ -135,7 +193,7 @@ newTalent{
 	getInvDur = function(self, t) return self:combatTalentScale(t, 2, 4, 0.75) end,
 	
 	action = function(self, t)
-		randJoker = math.random(1, 8)	-- Check to see if we draw the Ace of Hearts.
+		randJoker = math.random(1, 8)	-- Check to see if we draw the Ace of Hearts. 12.5% chance.
 		
 		-- Ace of Hearts is drawn!
 		if randJoker == 1 then
@@ -245,6 +303,7 @@ newTalent{
 
 newTalent{
 	-- Draws one of six cards, all extremely powerful but incredibly variate in what their effects.
+	-- Lots of utility (and some stranger) effects.
 	name = "Deck of Oddities",
 	type = {"technique/luck-of-the-draw", 2},
 	message = "@Source@ draws from the Deck of Oddities!",
@@ -254,30 +313,75 @@ newTalent{
 	tactical = { BUFF = 2 },
 	no_energy = true,
 	no_npc_use = true,
-	
+	range = 0,
+	radius = function(self, t) return math.floor(self:combatTalentScale(t, 2.5, 4.5, 0.75)) end,	
+	target = function(self, t)
+		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), selffire=false, talent=t}
+	end,
+	-- Bulwark of Faith scaling
+	getBulwkDur = function(self, t) return math.floor(self:combatTalentScale(t, 4.5, 7.5, 0.75)) end,
+	getIntimPwr = function(self, t) return self:combatTalentScale(t, 29, 41, 0.75) end,
 	-- Lunar Cloak scaling
 	getInvisPwr = function(self, t) return self:combatTalentScale(t, 216, 342, 0.75) end,
 	getInvisDur = function(self, t) return self:combatTalentScale(t, 12, 18, 0.75) end,
+	-- The Jester scaling
+	getBlindDur = function(self, t) return math.floor(self:combatTalentScale(t, 3.5, 5.5, 0.75)) end,
+	getAvoidBuf = function(self, t) return self:combatTalentScale(t, 12, 31, 0.75) end,
 	-- Necromutation scaling
 	getNecroDur = function(self, t) return self:combatTalentScale(t, 15, 20, 0.75) end,
 	getDieAt = function(self, t) return self:combatTalentScale(t, 650, 2150, 0.75) end,
 	getAffinity = function(self, t) return self:combatTalentScale(t, 30, 60, 0.75) end,
 	getArmor = function(self, t) return self:combatTalentScale(t, 44, 81, 0.75) end,
 	getPwr = function(self, t) return self:combatTalentScale(t, 21, 50, 0.75) end,
+	-- Fortune's Gambit scaling
+	getFortBuf = function(self, t) return self:combatTalentScale(t, 21, 5, 0.75) end,	-- If unlucky, enemies may end up GAINING luck. Less likely as skill upgrades.
+	getFortNrf = function(self, t) return self:combatTalentScale(t, 41, 89, 0.75) end,
+	getFortDur = function(self, t) return math.floor(self:combatTalentScale(t, 5.5, 8.5, 0.75)) end,
 	-- Za Warudo scaling
 	getBonTurn = function(self, t) return math.floor(self:combatTalentScale(t, 2, 4, 0.75)) end,
 	
 	action = function(self, t)
+		local tg = self:getTalentTarget(t)
+		
+		randJoker = math.random(1, 8)
+		if randJoker == 1 then
+			game.logSeen(self, "#STEEL_BLUE#%s invokes the Ace of Clubs, drastically boosting Luck and drawing another card!#LAST#", self.name:capitalize())
+			self:setEffect(self.EFF_ACE_OF_CLUBS, 3, {})
+		end
+		
 		randCard = math.random(1, 6)
 		
 		if randCard == 1 then
-			self:setEffect(self.EFF_INVULNERABLE, 1, {})
+			game.logSeen(self, "#STEEL_BLUE#%s invokes Bulwark of Faith!#LAST#", self.name:capitalize())
+			self:setEffect(self.EFF_BULWARK_OF_FAITH, t.getBulwkDur(self, t), {})
+			self:project(tg, self.x, self.y, function(px, py)
+				local target = game.level.map(px, py, Map.ACTOR)
+				if not target then return end
+				target:setEffect(target.EFF_INTIMIDATED, t.getBulwkDur(self, t), {power = t.getIntimPwr(self, t)})
+			end)
 		elseif randCard == 2 then
 			game.logSeen(self, "#STEEL_BLUE#%s invokes Lunar Cloak and becomes invisible!#LAST#", self.name:capitalize())
 			self:setEffect(self.EFF_INVISIBILITY, t.getInvisDur(self, t), {power = t.getInvisPwr(self, t), penalty = 0, false})
+		elseif randCard == 3 then
+			game.logSeen(self, "#STEEL_BLUE#%s invokes The Jester and is promptly enveloped in a flash of light!#LAST#", self.name:capitalize())
+			self:project(tg, self.x, self.y, function(px, py)
+				local target = game.level.map(px, py, Map.ACTOR)
+				if not target then return end
+				target:setEffect(target.EFF_BLINDED, t.getBlindDur(self, t), {})
+				target:setEffect(target.EFF_STUNNED, t.getBlindDur(self, t), {})
+			end)
+			self:setEffect(self.EFF_DECK_JESTER, t.getBlindDur(self, t) + 2, {power = t.getAvoidBuf(self, t)})	-- Makes the buff last a tad bit longer than the blind.
 		elseif randCard == 4 then
 			game.logSeen(self, "#STEEL_BLUE#%s invokes Necromutation and morphs into a demilich!#LAST#", self.name:capitalize())
 			self:setEffect(self.EFF_NECROMUTATION, t.getInvisDur(self, t), {heroism = t.getDieAt(self, t), affinity = t.getAffinity(self, t), armor = t.getArmor(self, t), power = t.getPwr(self, t)})	-- Placeholder values!
+		elseif randCard == 5 then
+			game.logSeen(self, "#STEEL_BLUE#%s invokes Fortune's Gambit, drastically affecting luck!#LAST#", self.name:capitalize())
+			self:project(tg, self.x, self.y, function(px, py)
+				randLuk = math.random(t.getFortNrf(self, t) * -1, t.getFortBuf(self, t))
+				local target = game.level.map(px, py, Map.ACTOR)
+				if not target then return end
+				target:setEffect(target.EFF_FORTUNES_GAMBIT, t.getFortDur(self, t), {power = randLuk})
+			end)
 		else
 			game.logSeen(self, "#STEEL_BLUE#%s invokes The World, stopping time!#LAST#", self.name:capitalize())
 			game:onTickEnd(function()
@@ -291,28 +395,32 @@ newTalent{
 		return true
 	end,
 	info = function(self, t)
+		local radius = self:getTalentRadius(t)
 		return ([[Invoke a card from the Deck of Oddities, triggering one of six possible effects.
-		#YELLOW#Connate Summoning#WHITE#
-		
+		#YELLOW#Bulwark of Faith#WHITE#
+		Gain 40%% resistance to all damage and 25%% physical damage affinity for %d turns, and intimidate all foes within %d tiles of the user for the same duration.
+		Intimidated foes suffer a -%d penalty to attack, spell, and mindpower. While Bulwark of Faith is active, you are rooted in place. This effect cannot be dispelled or removed early.
 		#YELLOW#Lunar Cloak#WHITE#
 		Become invisible (power %d) for %d turns. This effect does not confer a damage penalty and allows health regeneration.
-		#YELLOW#Mass Psychoportation#WHITE#
+		#YELLOW#The Jester#WHITE#
+		A sudden flash of light blinds and stuns enemies in a %d-tile radius around you for %d turns. Confers a %d-turn buff which grants you a %d%% chance to avoid incoming damage.
 		#YELLOW#Necromutation#WHITE#
 		For %d turns, global speed is reduced by 50%%, and your healing mod is set to zero. Gain listed bonuses:
 		- Die only when reaching -%d health.
 		- Gain %d%% cold and darkness damage affinity.
 		- Immunity to poison, diseases, and stuns.
-		- Armor hardiness increases to 100%%, and armor increased by %d.
+		- Armor hardiness set to 100%%, and armor increased by %d.
 		- All saves, Physical Power, Spellpower, and Mindpower increased by %d.
 		This effect cannot be dispelled or removed early.
-		#YELLOW#Circle of Conflagration#WHITE#
-		Creates a circle of radius X-XX at your feet which lasts XX turns; targets in the circle take XX Sundering Fire damage per turn, reducing Armor by XX.
+		#YELLOW#Fortune's Gambit#WHITE#
+		Drastically affects the luck of all enemies within %d tiles of the user for %d turns.
+		Each target has its luck change anywhere from +%d to %d points (most characters have 50 base Luck).
 		#YELLOW#The World#WHITE#
 		Gain %d turns. Damage is not reduced while time is stopped.
 		
-		There is a 10%% chance to draw the #GREY#Ace of Clubs#WHITE#, which will trigger three random effects from the Deck of Oddities.]]):format(
-		t.getInvisPwr(self, t), t.getInvisDur(self, t), t.getNecroDur(self, t), t.getDieAt(self, t), t.getAffinity(self, t), t.getArmor(self, t), t.getPwr(self, t),
-		t.getBonTurn(self, t))
+		There is a 12.5%% chance to draw the #GREY#Ace of Clubs#WHITE#, which boosts Luck by +250 points for 3 turns in addition to drawing a card.]]):format(t.getBulwkDur(self, t), radius, t.getIntimPwr(self, t),
+		t.getInvisPwr(self, t), t.getInvisDur(self, t), radius, t.getBlindDur(self, t), t.getBlindDur(self, t) + 2, t.getAvoidBuf(self, t), t.getNecroDur(self, t),
+		t.getDieAt(self, t), t.getAffinity(self, t), t.getArmor(self, t), t.getPwr(self, t), radius, t.getFortDur(self, t), t.getFortBuf(self, t), t.getFortNrf(self, t) * -1, t.getBonTurn(self, t))
 	end,
 }
 

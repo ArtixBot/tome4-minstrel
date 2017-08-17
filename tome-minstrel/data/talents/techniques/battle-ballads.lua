@@ -17,11 +17,11 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
--- Overall completion: 75%
+-- Overall completion: 100%
 	-- Balladeer: 100%
 	-- Armsbreaking Aria: 100%
 	-- Galvanizing Tune: 100%
-	-- Apocalyptic Aria: 0%
+	-- Starstriking Solo: 100%
 
 -- Balladeer Skills
 
@@ -327,9 +327,6 @@ newTalent{
 				end
 			end
 		end
-		if self:isTalentActive(self.T_BALLAD_OF_CELERITY) then
-			no_energy = true
-		end
 		
 		return true
 	end,
@@ -350,39 +347,53 @@ newTalent{
 	require = techs_req4,
 	points = 5,
 	cooldown = 24,
-	tactical = { MANA = 1, STAMINA = 1, BUFF = 1 },
-	getDuration = function(self, t) return math.floor(self:combatTalentLimit(t, 24, 3, 7)) end, -- Limit < 24
-	no_energy = true,
+	range = 0,
+	radius = function(self, t) return math.floor(self:combatTalentScale(t, 1.5, 3.5, 0.75)) end,
+	tactical = { DISABLE = 2, BUFF = 2 },
+	getStunDur = function(self, t) return self:combatTalentScale(t, 2.5, 5.5, 0.75) end,
+	getBuffDur = function(self, t) return self:combatTalentLimit(t, 6, 3, 5) end,
+	getPushDis = function(self, t) return math.floor(self:combatTalentScale(t, 4, 7, 0.75)) end,
+	getCritUp = function(self, t) return self:combatTalentScale(t, 18, 24, 0.75) end,
+	getResUp = function(self, t) return self:combatTalentScale(t, 21, 32, 0.75) end,
+	getFlat = function(self, t) return self:combatTalentScale(t, 40, 65, 0.75) end,
+	getDefUp = function(self, t) return self:combatTalentScale(t, 25, 40, 0.75) end,
+	getSpdUp = function(self, t) return self:combatTalentScale(t, 0.18, 0.27, 0.75) end,
+	target = function(self, t)
+		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), selffire=false, talent=t}
+	end,
 	action = function(self, t)
-		self:setEffect(self.EFF_MARTIAL_MAGIC, t.getDuration(self, t), {power = 10})
-		if self:getTalentLevel(t) >= 5 then
-			local effs = {}
-			-- Go through all spell effects
-			for eff_id, p in pairs(self.tmp) do
-				local e = self.tempeffect_def[eff_id]
-				if e.status == "detrimental" then
-					if e.subtype.silence then
-						effs[#effs+1] = {"effect", eff_id}
-					end
-				end
-			end
-			local nb = 10000
-			while #effs > 0 and nb > 0 do
-				local eff = rng.tableRemove(effs)
-				self:removeEffect(eff, silent, force)
-				nb = nb - 1
-				removed = removed + 1
-			end
+		local tg = self:getTalentTarget(t)
+		
+		self:project(tg, self.x, self.y, function(px, py)
+			local target = game.level.map(px, py, Map.ACTOR)
+			if not target then return end
+			target:setEffect(target.EFF_STUNNED, t.getStunDur(self, t), {apply_power=self:combatMindpower()})
+			target:knockback(self.x, self.y, t.getPushDis(self, t))
+		end)
+		
+		game.level.map:particleEmitter(self.x, self.y, 1, "shout", {size=4, distorion_factor=0.6, radius=self:getTalentRadius(t), life=30, nb_circles=4, rm=0.6, rM=0.6, gm=0.6, gM=0.6, bm=1, bM=1, am=0.6, aM=0.8})
+		
+		if self:isTalentActive(self.T_BALLAD_OF_PRECISION) then
+			self:setEffect(self.EFF_SOLO_PRECISION, t.getBuffDur(self, t), {power = t.getCritUp(self, t)})
 		end
+		if self:isTalentActive(self.T_BALLAD_OF_REVIVIFICATION) then
+			self:setEffect(self.EFF_SOLO_REVIVIFICATION, t.getBuffDur(self, t), {power = t.getResUp(self, t), def = t.getFlat(self, t)})
+		end
+		if self:isTalentActive(self.T_BALLAD_OF_CELERITY) then
+			self:setEffect(self.EFF_SOLO_CELERITY, t.getBuffDur(self, t), {power = t.getDefUp(self, t), spd = t.getSpdUp(self, t)})
+		end
+		
 		return true
 	end,
 	info = function(self, t)
-		local duration = t.getDuration(self, t)
-		return ([[An awe-inspiring solo temporarily stuns all enemies within a radius of XX for XX turns, and knocks them back XX tiles.
-		If you have a Ballad active, then you are infused with a powerful buff for XX turns. Effects depend on currently active Ballad.
+		local radius = self:getTalentRadius(t)
+		return ([[An awe-inspiring solo stuns enemies in a %d-tile radius for %d turns and knocks them back %d tiles. Chance to stun increases with Mindpower.
+		Activating this skill confers a powerful buff for %d turns if a Ballad is active, the effects of which are dependent on the active Ballad.
 		
-		#ORANGE#Precision:#WHITE# Attacks have a XX increased chance to critically hit and penetrate all armor.
-		#PINK#Revivification:#WHITE# Confers XX resistance to all damage, +XX flat damage reduction, and immunity to bleed, poisons, and diseases.
-		#GOLD#Celerity:#WHITE# Gain XX defense, XX global speed, and immunity to stuns, slows, and pins.]])
+		#ORANGE#Precision:#WHITE# Attacks gain +%d%% critical hit chance and penetrate all armor.
+		#PINK#Revivification:#WHITE# Confers +%d%% resistance to all damage, +%d flat damage resistance, and immunity to bleeds, poisons, and diseases.
+		#GOLD#Celerity:#WHITE# Gain +%d defense, +%d%% global speed, and immunity to stuns, pins, and knockback.]]):
+		format(radius, t.getStunDur(self, t), t.getPushDis(self, t), t.getBuffDur(self, t), t.getCritUp(self, t), t.getResUp(self, t), t.getFlat(self, t),
+		t.getDefUp(self, t), t.getSpdUp(self, t)*100)
 	end,
 }

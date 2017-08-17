@@ -203,6 +203,19 @@ newEffect{
 }
 
 newEffect{
+	name = "DECK_JESTER", image = "talents/deck_of_oddities.png",
+	desc = "Dodgy",
+	long_desc = function(self, eff) return ("%d%% chance to avoid incoming damage."):format(eff.power) end,
+	type = "physical",
+	subtype = { morale=true },
+	status = "beneficial",
+	parameters = {power=10},
+	activate = function (self, eff)
+		self:effectTemporaryValue(eff, "cancel_damage_chance", eff.power)
+	end,
+}
+
+newEffect{
 	name = "ARIA_HEALDOWN", image = "effects/ballad_of_revivification.png",
 	desc = "Reduced Healing",
 	long_desc = function(self, eff) return ("All healing the target receives is %d%% less effective."):format(eff.power * 100) end,
@@ -215,5 +228,117 @@ newEffect{
 	end,
 	deactivate = function(self, eff)
 		self:removeTemporaryValue("healing_factor", eff.heal_down)
+	end,
+}
+
+newEffect{
+	name = "SOLO_PRECISION", image = "talents/ballad_of_precision.png",
+	desc = "Starstriking Precision",
+	long_desc = function(self, eff) return ("Attacks gain +%d%% critical chance and penetrate all armor."):format(eff.power) end,
+	type = "physical",
+	subtype = { morale=true },
+	status = "beneficial",
+	parameters = {power=10},
+	activate = function (self, eff)
+		self:effectTemporaryValue(eff, "combat_generic_crit", eff.power)
+		self:effectTemporaryValue(eff, "combat_apr", 99999)		-- If any enemy has >99999 armor then I'm not sure what to do other then make the number bigger.
+	end,
+}
+
+newEffect{
+	name = "SOLO_REVIVIFICATION", image = "talents/ballad_of_revivification.png",
+	desc = "Starstriking Revivification",
+	long_desc = function(self, eff) return ("+%d%% resistance to all damage, +%d flat damage reduction (before reductions), and immune to bleeds, poisons, and diseases."):format(eff.power, eff.def) end,
+	type = "physical",
+	subtype = { morale=true },
+	status = "beneficial",
+	parameters = {power=10, def = 10},
+	activate = function (self, eff)
+		eff.resist = self:addTemporaryValue("resists", {all=eff.power})
+		eff.armor = self:addTemporaryValue("flat_damage_armor", {all = eff.def})
+		self:effectTemporaryValue(eff, "disease_immune", 100)
+		self:effectTemporaryValue(eff, "poison_immune", 100)
+		self:effectTemporaryValue(eff, "cut_immune", 100)
+	end,
+	deactivate = function(self, eff)
+		self:removeTemporaryValue("resists", eff.resist)
+		self:removeTemporaryValue("flat_damage_armor", eff.armor)
+	end,
+}
+
+newEffect{
+	name = "SOLO_CELERITY", image = "talents/ballad_of_celerity.png",
+	desc = "Starstriking Celerity",
+	long_desc = function(self, eff) return ("+%d defense, +%d%% global speed, and immune to stuns, pins, and knockback."):format(eff.power, eff.spd*100) end,
+	type = "physical",
+	subtype = { morale=true },
+	status = "beneficial",
+	parameters = {power=10, spd = 0.1},
+	activate = function (self, eff)
+		eff.gblspd = self:addTemporaryValue("global_speed_add", eff.spd)
+		self:effectTemporaryValue(eff, "combat_def", eff.power)
+		self:effectTemporaryValue(eff, "stun_immune", 100)
+		self:effectTemporaryValue(eff, "pin_immune", 100)
+		self:effectTemporaryValue(eff, "knockback_immune", 100)
+	end,
+	deactivate = function(self, eff)
+		self:removeTemporaryValue("global_speed_add", eff.gblspd)
+	end,
+}
+
+newEffect{
+	name = "DECK_DEGENERATION", image = "talents/deck_of_malevolence.png",
+	desc = "Physical Degeneration",
+	long_desc = function(self, eff) return ("This unit's physical capabilities are rapidly degenerating, reducing damage dealt by %d%%, global speed by %d%%, and all resistances by %d%%."):format(eff.power, eff.spd * 100, eff.res) end,
+	type = "physical",
+	subtype = { morale=true },
+	status = "detrimental",
+	parameters = {power=10, spd = 0.1, res = 10},
+	on_gain = function(self, err) return "#Target# is degenerating!", "+Degeneration" end,
+	on_lose = function(self, err) return "#Target# is no longer decaying.", "-Degeneration" end,
+	activate = function (self, eff)
+		eff.dam_penalty = self:addTemporaryValue("inc_damage", {all=-eff.power})
+		eff.resist = self:addTemporaryValue("resists", {all=-eff.res})
+		eff.gblspd = self:addTemporaryValue("global_speed_add", -eff.spd)
+	end,
+	deactivate = function(self, eff)
+		self:removeTemporaryValue("inc_damage", eff.dam_penalty)
+		self:removeTemporaryValue("resists", eff.resist)
+		self:removeTemporaryValue("global_speed_add", eff.gblspd)
+	end,
+}
+
+newEffect{
+	name = "DECK_TERRA", image = "talents/deck_of_malevolence.png",
+	desc = "Pierced by Earth",
+	long_desc = function(self, eff) return ("This unit has been pierced by earthen spires, pinning it in place and causing to bleed for %d damage over the duration of this effect."):format(eff.power*eff.dur) end,
+	type = "physical",
+	subtype = { wound=true, cut=true, bleed=true, pin=true },
+	status = "detrimental",
+	parameters = {power=10},
+	on_gain = function(self, err) return "#Target# is pierced by earthen spires!", "+Pierced by Earth" end,
+	on_lose = function(self, err) return "#Target# is no longer decaying.", "-Pierced by Earth" end,
+	on_merge = function(self, old_eff, new_eff)
+		-- Merge the flames!
+		local olddam = old_eff.power * old_eff.dur
+		local newdam = new_eff.power * new_eff.dur
+		local dur = math.ceil((old_eff.dur + new_eff.dur) / 2)
+		old_eff.dur = dur
+		old_eff.power = (olddam + newdam) / dur
+		return old_eff
+	end,
+	activate = function (self, eff)
+		eff.tmpid = self:addTemporaryValue("never_move", 1)
+		if eff.src and eff.src:knowTalent(self.T_BLOODY_BUTCHER) then
+			local t = eff.src:getTalentFromId(eff.src.T_BLOODY_BUTCHER)
+			local resist = math.min(t.getResist(eff.src, t), math.max(0, self:combatGetResist(DamageType.PHYSICAL)))
+			self:effectTemporaryValue(eff, "resists", {[DamageType.PHYSICAL] = -resist})
+		end
+	end,
+	on_timeout = function(self, eff)
+		DamageType:get(DamageType.PHYSICAL).projector(eff.src or self, self.x, self.y, DamageType.PHYSICAL, eff.power)
+	end,
+	deactivate = function(self, eff)
+		self:removeTemporaryValue("never_move", eff.tmpid)
 	end,
 }

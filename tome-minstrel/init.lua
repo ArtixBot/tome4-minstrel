@@ -1,7 +1,7 @@
 long_name = "Minstrel"
 short_name = "minstrel"
 for_module = "tome"
-version = {1,5,3}
+version = {1,5,5}
 addon_version = {1,0,0}
 weight = 100
 author = { "ArtixBot" }
