@@ -39,11 +39,11 @@ newEntity{ base = "BASE_KNIFE", define_as = "TRICK_LUTE",
 	desc = [[Victario was a famed minstrel whose tales of adventure and heroism entertained thousands in Maj'Eyal. His blessed lute-smaller than most stringed devices-served another purpose as a self-defense weapon to strike down bandits and marauders.]],
 	level_range = {28, 40},
 	rarity = 200,
-	require = { stat = { dex=24, wil=32, cun=32 }, },
+	require = { stat = { dex=24, wil=28, cun=28 }, },
 	cost = 350,
 	material_level = 4,
 		combat = {
-		dam = 32,
+		dam = 38,
 		apr = 8,
 		physcrit = 10,
 		dammod = {cun=0.35, str=0.20, dex=0.35},
@@ -61,27 +61,47 @@ newEntity{ base = "BASE_KNIFE", define_as = "TRICK_LUTE",
 			["technique/performance-arts"] = 0.1,
 		},
 	},
-	max_power = 50, power_regen = 1,
-	use_talent = { id = Talents.T_STARSTRIKING_SOLO, level = 1, power = 50 },
+	set_list = { {"define_as","TASTING_CHALICE"} },
+	set_desc = {
+		lute = "'Stay a while, and listen to the grand tales of Victario, the Harbinger of Everlasting Story!'",
+	},
+	on_set_complete = function(self, who)
+		self:specialSetAdd({"wielder","max_stamina"}, 35)
+		self:specialSetAdd({"wielder","confusion_immune"}, 0.25)
+		self:specialSetAdd({"wielder","silence_immune"}, 0.25)
+		game.logSeen(who, "#GOLD#You hear a faint laugh as Victario's belongings are united.")
+	end,
+	on_set_broken = function(self, who)
+		game.logPlayer(who, "#GREY#The laugh fades away.")
+	end,
 }
 
-newEntity{ base = "BASE_TOOL_MISC",
-	power_source = {nature = true},
+newEntity{ base = "BASE_TOOL_MISC", define_as = "TASTING_CHALICE",
+	power_source = {technique = true, nature = true},
 	unique=true, rarity=240, image = "object/artifact/honeywood_chalice.png",
 	type = "charm",
 	name = "Victario's Tasting Chalice",
 	unided_name = "tasting chalice",
 	color = colors.BROWN,
 	level_range = {28, 40},
-	desc = [[In his early days, Victario served as a taster for a duke he considered "scummier than a ship's ratspawn." After one too many near-fatal poisonings by the duke himself, Victario murdered his employer and took the bronze chalice for himself.]],
+	require = { stat = { dex=24, wil=28, cun=28 }, },
+	desc = [[In his early days, Victario served as a taster for a duke he considered "scummier than a ship's ratspawn." After one too many near-fatal poisonings by the duke, Victario murdered his employer and took the bronze chalice for himself.]],
 	cost = 320,
 	material_level = 4,
 	wielder = {
 		combat_physresist = 15,
 		inc_stats = {[Stats.STAT_WIL] = 8,},
-		inc_damage={[DamageType.POISON] = 18, [DamageType.ACID] = 18},
+		melee_project={[DamageType.POISON] = 18, [DamageType.ACID] = 18},
+		on_melee_hit={[DamageType.POISON] = 24, [DamageType.ACID] = 24},
 		resists={[DamageType.NATURE] = 20,},
-		poison_immune = 0.35,
-		
+		poison_immune = 0.35,	
 	},
+	set_list = { {"define_as","TRICK_LUTE"} },
+	set_desc = {
+		chalice = "'Stay awhile, and listen to the grand tales of Victario, the Harbinger of Everlasting Story!'",
+	},
+	on_set_complete = function(self, who)
+		self:specialSetAdd({"wielder","on_melee_hit"}, {[engine.DamageType.CORRUPTED_BLOOD]=24, [engine.DamageType.ACID_DISARM]=24})
+		self:specialSetAdd({"wielder","melee_project"}, {[engine.DamageType.CORRUPTED_BLOOD]=18, [engine.DamageType.ACID_DISARM]=18})
+	end,
 }

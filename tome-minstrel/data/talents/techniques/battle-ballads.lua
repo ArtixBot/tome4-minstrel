@@ -19,9 +19,13 @@
 
 -- Overall completion: 100%
 	-- Balladeer: 100%
+		-- POLISHING: Add particle effects for each sustained talent.
 	-- Armsbreaking Aria: 100%
+		-- POLISHING: Add sfx and particle effects.
 	-- Galvanizing Tune: 100%
+		-- POLISHING: Add sfx and particle effects.
 	-- Starstriking Solo: 100%
+		-- POLISHING: Add sfx and particle effects.
 
 -- Balladeer Skills
 
@@ -48,12 +52,13 @@ newTalent{
 		self:talentTemporaryValue(ret, "combat_atk", t.getAcc(self, t))
 		self:talentTemporaryValue(ret, "combat_generic_crit", t.getCritCh(self, t))
 		self:talentTemporaryValue(ret, "combat_critical_power", t.getCritDam(self, t))
-		ret.particle = self:addParticles(Particles.new("golden_shield", 1))
-		
+		particle1 = self:addParticles(Particles.new("shader_shield", 1, {toback=true,  size_factor=1.5, y=-0.3, img="healarcane"}, {type="healing", time_factor=4000, noup=2.0, beamColor1={0xff/255, 0x22/255, 0x22/255, 1}, beamColor2={0xff/255, 0x60/255, 0x60/255, 1}, circleColor={0,0,0,0}, beamsCount=8}))
+		particle2 = self:addParticles(Particles.new("shader_shield", 1, {toback=false, size_factor=1.5, y=-0.3, img="healarcane"}, {type="healing", time_factor=4000, noup=1.0, beamColor1={0xff/255, 0x22/255, 0x22/255, 1}, beamColor2={0xff/255, 0x60/255, 0x60/255, 1}, circleColor={0,0,0,0}, beamsCount=8}))
 		return ret
 	end,
 	deactivate = function(self, t, p)
-		self:removeParticles(p.particle)
+		self:removeParticles(particle1)
+		self:removeParticles(particle2)
 		return true
 	end,
 	info = function(self, t)
@@ -87,12 +92,10 @@ newTalent{
 		self:talentTemporaryValue(ret, "healing_factor", t.getHealMod(self, t))
 		self:talentTemporaryValue(ret, "life_regen", t.getHpRegen(self, t))
 		self:talentTemporaryValue(ret, "ignore_direct_crits", t.getCritRed(self, t))
-		ret.particle = self:addParticles(Particles.new("golden_shield", 1))
-		
+			
 		return ret
 	end,
 	deactivate = function(self, t, p)
-		self:removeParticles(p.particle)
 		return true
 	end,
 	info = function(self, t)

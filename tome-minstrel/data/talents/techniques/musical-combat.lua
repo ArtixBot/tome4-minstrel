@@ -17,7 +17,7 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
--- Overall completion: 100%
+-- Overall completion: 100% + polish done!
 	-- Opening Sweep: 100%
 	-- Symphonic Whirl: 100%
 	-- Cadenza: 100%
@@ -161,7 +161,7 @@ newTalent{
 				game.logSeen(target, "%s resisted the confusion!", target.name:capitalize())
 			end
 		end
-
+		game.level.map:particleEmitter(target.x, target.y, 1, "stalked_start")
 		return true
 	end,
 	info = function(self, t)
@@ -190,7 +190,7 @@ newTalent{
 		if not target or not self:canProject(tg, x, y) then return nil end
 		local hit = self:attackTarget(target, nil, self:combatTalentWeaponDamage(t, 4.00, 6.35), true)
 		self:setEffect(self.EFF_FINALE_DEBUFF, 4, {power=0.35, apply_power=10000, no_ct_effect=true})
-		
+		game:playSoundNear(self, "talents/breath")
 		return true
 	end,
 	info = function(self, t)

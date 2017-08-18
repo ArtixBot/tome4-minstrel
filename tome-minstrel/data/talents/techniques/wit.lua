@@ -50,7 +50,7 @@ newTalent{
 			target:setEffect(target.EFF_MENTAL_INSTABILITY, t.getDur(self, t) - 2, {apply_power=self:combatMindpower()})
 		end)
 		
-		game.level.map:particleEmitter(self.x, self.y, 1, "shout", {size=4, distorion_factor=0.6, radius=self:getTalentRadius(t), life=30, nb_circles=4, rm=0.6, rM=0.6, gm=0.6, gM=0.6, bm=1, bM=1, am=0.6, aM=0.8})
+		game.level.map:particleEmitter(self.x, self.y, 1, "shout", {size=4, distorion_factor=1, radius=self:getTalentRadius(t), life=40, nb_circles=2, rm=0.6, rM=0.6, gm=0.6, gM=0.6, bm=1, bM=1, am=0.6, aM=0.8})
 		return true
 	end,
 	info = function(self, t)
@@ -138,7 +138,6 @@ newTalent{
 		end
 		target:pull(self.x, self.y, tg.range)
 		target:setEffect(target.EFF_COUNTERSTRIKE, 1, {power = 0, nb = 1})
-		
 		-- Exploit effect.
 		if target:hasEffect(target.EFF_MENTAL_INSTABILITY) then
 			game.logSeen(self, "#STEEL_BLUE#%s exploits the target's mental instability!#LAST#", self.name:capitalize())
@@ -160,6 +159,8 @@ newTalent{
 				game.logSeen(target, "%s's %s is disrupted by Enraging Slight!", target.name:capitalize(), t.name)
 			end
 		end
+		game.level.map:particleEmitter(self.x, self.y, math.max(math.abs(x-self.x), math.abs(y-self.y)), "flamebeam", {tx=x-self.x, ty=y-self.y}, {type="lightning"})
+		game:playSoundNear(self, "talents/fire")	-- imagine that you're playing your mixtape or something
 		return true
 	end,
 
