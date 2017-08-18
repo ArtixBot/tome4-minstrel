@@ -92,10 +92,11 @@ newTalent{
 		self:talentTemporaryValue(ret, "healing_factor", t.getHealMod(self, t))
 		self:talentTemporaryValue(ret, "life_regen", t.getHpRegen(self, t))
 		self:talentTemporaryValue(ret, "ignore_direct_crits", t.getCritRed(self, t))
-			
+		ret.particle = self:addParticles(Particles.new("circle", 1, {base_rot=1, oversize=1.0, a=200, appear=8, speed=0, img="curse_sfx", radius=0}))
 		return ret
 	end,
 	deactivate = function(self, t, p)
+		self:removeParticles(p.particle)
 		return true
 	end,
 	info = function(self, t)

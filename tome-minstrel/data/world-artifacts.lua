@@ -50,7 +50,7 @@ newEntity{ base = "BASE_KNIFE", define_as = "TRICK_LUTE",
 		special_on_crit = {desc="plays a power chord, dazing the target", fct=function(combat, who, target)
 			if target:canBe("stun") then
 				local check = math.max(who:combatSpellpower(), who:combatMindpower(), who:combatAttack())
-				target:setEffect(target.EFF_DAZED, 4, {src=who, apply_power=check})
+				target:setEffect(target.EFF_DAZED, 6, {src=who, apply_power=check})
 			end
 		end},
 	},
@@ -79,7 +79,6 @@ newEntity{ base = "BASE_KNIFE", define_as = "TRICK_LUTE",
 newEntity{ base = "BASE_TOOL_MISC", define_as = "TASTING_CHALICE",
 	power_source = {technique = true, nature = true},
 	unique=true, rarity=240, image = "object/artifact/honeywood_chalice.png",
-	type = "charm",
 	name = "Victario's Tasting Chalice",
 	unided_name = "tasting chalice",
 	color = colors.BROWN,
@@ -104,4 +103,7 @@ newEntity{ base = "BASE_TOOL_MISC", define_as = "TASTING_CHALICE",
 		self:specialSetAdd({"wielder","on_melee_hit"}, {[engine.DamageType.CORRUPTED_BLOOD]=24, [engine.DamageType.ACID_DISARM]=24})
 		self:specialSetAdd({"wielder","melee_project"}, {[engine.DamageType.CORRUPTED_BLOOD]=18, [engine.DamageType.ACID_DISARM]=18})
 	end,
+	-- Currently bugged for some inexplicable reason involving 'T_GLOBAL_CD'; do not activate.
+	--max_power = 1, power_regen = 0,
+	--use_talent = { id = Talents.T_TEMPTING_GOBLET, level = 1, power = 1 },
 }
