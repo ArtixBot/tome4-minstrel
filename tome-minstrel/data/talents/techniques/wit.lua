@@ -17,14 +17,14 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
--- Overall completion: 100% :D
+-- Overall completion: 100% + polish
 	-- Diatribe of Incapacitation: 100%
 	-- Mockery: 100%
 	-- Enraging Slight: 100%
 	-- Exploit Instability: 100%
 	
 newTalent{
-	-- Drastically reduces all damage dealt by enemies in a area around the user for a short period of time. Cannot be resisted or removed.
+	-- Drastically reduces all dealt by enemies in a area around the user for a short period of time. Cannot be resisted or removed.
 	-- Inflicts a Mental Instability debuff. Wit abilities exploit mental instability, gaining power.
 	name = "Diatribe of Incapacitation",
 	type = {"technique/wit", 1},
@@ -51,6 +51,7 @@ newTalent{
 		end)
 		
 		game.level.map:particleEmitter(self.x, self.y, 1, "shout", {size=4, distorion_factor=1, radius=self:getTalentRadius(t), life=40, nb_circles=2, rm=0.6, rM=0.6, gm=0.6, gM=0.6, bm=1, bM=1, am=0.6, aM=0.8})
+		game:playSoundNear(self, "actions/whip_hit")
 		return true
 	end,
 	info = function(self, t)
@@ -97,6 +98,7 @@ newTalent{
 		end)
 		
 		game.level.map:particleEmitter(self.x, self.y, 1, "shout", {size=4, distorion_factor=0.6, radius=self:getTalentRadius(t), life=30, nb_circles=4, rm=0.6, rM=0.6, gm=0.6, gM=0.6, bm=1, bM=1, am=0.6, aM=0.8})
+		game:playSoundNear(self, "ambient/town/town_medium2")
 		return true
 	end,
 	info = function(self, t)
@@ -160,7 +162,7 @@ newTalent{
 			end
 		end
 		game.level.map:particleEmitter(self.x, self.y, math.max(math.abs(x-self.x), math.abs(y-self.y)), "flamebeam", {tx=x-self.x, ty=y-self.y}, {type="lightning"})
-		game:playSoundNear(self, "talents/fire")	-- imagine that you're playing your mixtape or something
+		game:playSoundNear(self, "actions/punch3")
 		return true
 	end,
 
@@ -205,10 +207,12 @@ newTalent{
 				target:setEffect(target.EFF_CONFUSED, t.getDur(self, t), {power = 25})
 				target:setEffect(target.EFF_SILENCED, t.getDur(self, t), {})
 				target:setEffect(target.EFF_PINNED, t.getDur(self, t), {})
+				game.level.map:particleEmitter(target.x, target.y, 1, "circle", {base_rot=0, oversize=0.7, a=130, limit_life=8, appear=8, speed=0, img="curse_gfx_04", radius=0})
 			end
 		end)
 		
 		game.level.map:particleEmitter(self.x, self.y, 1, "shout", {size=4, distorion_factor=0.6, radius=self:getTalentRadius(t), life=30, nb_circles=4, rm=0.6, rM=0.6, gm=0.6, gM=0.6, bm=1, bM=1, am=0.6, aM=0.8})
+		game:playSoundNear(self, "talents/echo")
 		return true
 	end,
 	info = function(self, t)

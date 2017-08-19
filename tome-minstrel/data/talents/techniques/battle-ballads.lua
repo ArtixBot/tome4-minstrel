@@ -253,7 +253,8 @@ newTalent{
 				target:setEffect(target.EFF_SLOW, t.getDisarmDur(self, t), {power = t.getSlowPow(self, t), apply_power= self:combatMindpower()})
 			end)
 		end
-		
+	
+		game:playSoundNear(self, "talents/lightning_loud")
 		return true
 	end,
 	info = function(self, t)
@@ -332,6 +333,8 @@ newTalent{
 			end
 		end
 		
+		game.level.map:particleEmitter(self.x, self.y, 1, "stalked_start")
+		game:playSoundNear(self, "actions/eagle_scream")
 		return true
 	end,
 	info = function(self, t)
@@ -387,6 +390,7 @@ newTalent{
 			self:setEffect(self.EFF_SOLO_CELERITY, t.getBuffDur(self, t), {power = t.getDefUp(self, t), spd = t.getSpdUp(self, t)})
 		end
 		
+		game:playSoundNear(self, "talents/thunderstorm")
 		return true
 	end,
 	info = function(self, t)

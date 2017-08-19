@@ -131,6 +131,8 @@ newTalent{
 				target:setEffect(target.EFF_CONFUSED, t.getConfDur(self, t), {power = t.getConfPow(self, t)})
 			end
 		end)
+		
+		game:playSoundNear(self, "talents/warp")
 		return true
 	end,
 	info = function(self, t)
@@ -277,6 +279,7 @@ newTalent{
 			self:setEffect(self.EFF_INVULNERABLE, t.getInvDur(self, t), {})
 		end
 		
+		game:playSoundNear(self, "talents/warp")
 		return true
 	end,
 	info = function(self, t)
@@ -392,6 +395,7 @@ newTalent{
 			end)
 		end
 		
+		game:playSoundNear(self, "talents/warp")
 		return true
 	end,
 	info = function(self, t)
@@ -456,6 +460,7 @@ newTalent{
 			self:setTalentTypeMastery("cunning/luck-of-the-draw", self:getTalentTypeMastery("cunning/luck-of-the-draw") + t.getMasteryA(self, t))
 		end
 		
+		game:playSoundNear(self, "talents/spell_generic2")
 		return ret
 	end,
 	deactivate = function(self, t, p)

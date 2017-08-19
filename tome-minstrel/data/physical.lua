@@ -186,10 +186,6 @@ newEffect{
 	activate = function (self, eff)
 		self:effectTemporaryValue(eff, "life_regen", eff.hp)
 		self:effectTemporaryValue(eff, "stamina_regen", eff.stam)
-		eff.particle = self:addParticles(Particles.new("circle", 1, {base_rot=1, oversize=1.0, a=200, appear=8, speed=0, img="marked", radius=0}))
-	end,
-	deactivate = function(self, eff)
-		self:removeParticles(eff.particle)
 	end,
 }
 
