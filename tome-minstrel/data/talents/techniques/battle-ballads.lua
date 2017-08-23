@@ -52,13 +52,12 @@ newTalent{
 		self:talentTemporaryValue(ret, "combat_atk", t.getAcc(self, t))
 		self:talentTemporaryValue(ret, "combat_generic_crit", t.getCritCh(self, t))
 		self:talentTemporaryValue(ret, "combat_critical_power", t.getCritDam(self, t))
-		particle1 = self:addParticles(Particles.new("shader_shield", 1, {toback=true,  size_factor=1.5, y=-0.3, img="healarcane"}, {type="healing", time_factor=4000, noup=2.0, beamColor1={0xff/255, 0x22/255, 0x22/255, 1}, beamColor2={0xff/255, 0x60/255, 0x60/255, 1}, circleColor={0,0,0,0}, beamsCount=8}))
-		particle2 = self:addParticles(Particles.new("shader_shield", 1, {toback=false, size_factor=1.5, y=-0.3, img="healarcane"}, {type="healing", time_factor=4000, noup=1.0, beamColor1={0xff/255, 0x22/255, 0x22/255, 1}, beamColor2={0xff/255, 0x60/255, 0x60/255, 1}, circleColor={0,0,0,0}, beamsCount=8}))
+		
+		ret.particle = self:addParticles(Particles.new("precision", 1))
 		return ret
 	end,
 	deactivate = function(self, t, p)
-		self:removeParticles(particle1)
-		self:removeParticles(particle2)
+		self:removeParticles(p.particle)
 		return true
 	end,
 	info = function(self, t)
@@ -92,7 +91,8 @@ newTalent{
 		self:talentTemporaryValue(ret, "healing_factor", t.getHealMod(self, t))
 		self:talentTemporaryValue(ret, "life_regen", t.getHpRegen(self, t))
 		self:talentTemporaryValue(ret, "ignore_direct_crits", t.getCritRed(self, t))
-		ret.particle = self:addParticles(Particles.new("circle", 1, {base_rot=1, oversize=1.0, a=200, appear=8, speed=0, img="curse_sfx", radius=0}))
+		
+		ret.particle = self:addParticles(Particles.new("revivification", 1))
 		return ret
 	end,
 	deactivate = function(self, t, p)
@@ -129,7 +129,8 @@ newTalent{
 		self:talentTemporaryValue(ret, "movement_speed", t.getMovSpd(self, t))
 		self:talentTemporaryValue(ret, "knockback_immune", t.getImmune(self, t))
 		self:talentTemporaryValue(ret, "pin_immune", t.getImmune(self, t))
-		ret.particle = self:addParticles(Particles.new("golden_shield", 1))
+		
+		ret.particle = self:addParticles(Particles.new("celerity", 1))
 		
 		return ret
 	end,

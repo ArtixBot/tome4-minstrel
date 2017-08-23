@@ -138,7 +138,7 @@ newTalent{
 	require = techs_cun_req4,
 	points = 5,
 	mode = "passive",
-	getSpd = function(self, t) return self:combatTalentScale(t, 0.10, 0.18, 0.75) end,
+	getSpd = function(self, t) return self:combatTalentScale(t, 0.08, 0.15, 0.75) end,
 	getStamRecover = function(self, t) return self:combatTalentScale(t, 1.0, 5.0, 0.75) end,
 	getFatigue = function(self, t) return self:combatTalentScale(t, 14, 30, 0.75) end,
 	passives = function(self, t, p)

@@ -103,6 +103,9 @@ newTalent{
 				target:knockback(self.x, self.y, t.getRepulseDis(self, t))
 			elseif randCard == 2 then
 				target:setEffect(target.EFF_DECK_DEGENERATION, t.getDegenDur(self, t), {power = t.getDegenDam(self, t), spd = t.getDegenSpd(self, t), res = t.getDegenRes(self, t)})
+				
+				game.level.map:particleEmitter(self.x, self.y, tg.radius, "circle", {appear_size=2, empty_start=8, oversize=1, a=80, appear=11, limit_life=8, speed=5, img="green_demon_fire_circle", radius=tg.radius})
+				game.level.map:particleEmitter(self.x, self.y, tg.radius, "circle", {appear_size=2, oversize=1, a=80, appear=8, limit_life=11, speed=5, img="demon_fire_circle", radius=tg.radius})
 			elseif randCard == 3 then
 				target:setEffect(target.EFF_DECK_TERRA, t.getTerraDur(self, t), {power = t.getTerraDam(self, t)})
 			elseif randCard == 4 then
@@ -132,7 +135,7 @@ newTalent{
 			end
 		end)
 		
-		game:playSoundNear(self, "talents/warp")
+	
 		return true
 	end,
 	info = function(self, t)

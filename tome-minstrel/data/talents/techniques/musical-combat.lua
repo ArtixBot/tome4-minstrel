@@ -25,7 +25,6 @@
 
 newTalent{
 	-- Charge manuever which buffs user speed for a short period of time.
-	-- STATUS: Implemented, working! Todo: set so opening sweep only works when a target is selected (instead of allowing dash to tile)
 	name = "Opening Sweep",
 	type = {"technique/musical-combat", 1},
 	message = "@Source@ dashes with alarming speed!",
@@ -33,18 +32,21 @@ newTalent{
 	points = 5,
 	random_ego = "attack",
 	stamina = 22,
-	cooldown = function(self, t) return math.ceil(self:combatTalentLimit(t, 0, 6, 4)) end,
+	cooldown = function(self, t) return math.ceil(self:combatTalentLimit(t, 0, 8, 6)) end,
 	tactical = { ATTACK = { weapon = 1}, CLOSEIN = 3 },
 	requires_target = true,
 	is_melee = true,
 	getSpeed = function(self, t) return self:combatTalentLimit(t, 1, 0.10, 0.28) end,
 	target = function(self, t) return {type="bolt", range=self:getTalentRange(t), nolock=true, nowarning=true, requires_knowledge=false, stop__block=true} end,
 	range = function(self, t) return math.floor(self:combatTalentScale(t, 3, 5)) end,
-	on_pre_use = function(self, t)
-		if self:attr("never_move") then return false end
-		return true
-	end,
+	on_pre_use = function(self, t, silent) if not self:hasDualWeapon() then if not silent then game.logPlayer(self, "You require two weapons to use this talent.") end return false end return true end,
 	action = function(self, t)
+		local weapon, offweapon = self:hasDualWeapon()
+		if not weapon then
+			game.logPlayer(self, "Opening Sweep can only be used while dual wielding.")
+			return nil
+		end
+		
 		local tg = self:getTalentTarget(t)
 		local x, y, target = self:getTarget(tg)
 		if not self:canProject(tg, x, y) then return nil end
@@ -83,7 +85,8 @@ newTalent{
 	info = function(self, t)
 		return ([[Dash to a target tile with blinding speed.
 		Targeting an enemy with this ability will deliver a strike that deals 125%% weapon damage. A successful hit conserves your momentum, temporarily granting +%d%% global speed for 2 turns.
-		To build up momentum, the target tile must be at least 2 tiles away from the user.]]):format(100*t.getSpeed(self, t))
+		To build up momentum, the target tile must be at least 2 tiles away from the user.
+		Can only be used while dual wielding.]]):format(100*t.getSpeed(self, t))
 	end,
 }
 
@@ -101,9 +104,15 @@ newTalent{
 	target = function(self, t)
 		return {type="ball", range=self:getTalentRange(t), selffire=false, radius=1}
 	end,
+	on_pre_use = function(self, t, silent) if not self:hasDualWeapon() then if not silent then game.logPlayer(self, "You require two weapons to use this talent.") end return false end return true end,
 	tactical = { ATTACKAREA = 3 },
 	action = function(self, t)
-	
+		local weapon, offweapon = self:hasDualWeapon()
+		if not weapon then
+			game.logPlayer(self, "Symphonic Whirl can only be used while dual wielding.")
+			return nil
+		end
+		
 		local tg = self:getTalentTarget(t)
 		
 		self:project(tg, self.x, self.y, function(px, py, tg, self)
@@ -122,7 +131,8 @@ newTalent{
 		An enemy afflicted by Tempo Disruption will be impaired over three stages, each of which lasts 2 turns.
 		Stage 1: All damage dealt is reduced by 20%%.
 		Stage 2: Confused (25%% strength) and all damage dealt reduced by 40%%.
-		Stage 3: All resistances reduced by 25%% and stunned.]]):format(100 * self:combatTalentWeaponDamage(t, 0.47, 1.00))
+		Stage 3: All resistances reduced by 25%% and stunned.
+		Can only be used while dual wielding.]]):format(100 * self:combatTalentWeaponDamage(t, 0.47, 1.00))
 	end,
 }
 
@@ -136,9 +146,16 @@ newTalent{
 	stamina = 18,
 	requires_target = true,
 	is_melee = true,
+	on_pre_use = function(self, t, silent) if not self:hasDualWeapon() then if not silent then game.logPlayer(self, "You require two weapons to use this talent.") end return false end return true end,
 	target = function(self, t) return {type="hit", range=self:getTalentRange(t)} end,
 	getDuration = function(self, t) return math.floor(self:combatTalentScale(t, 3, 5)) end,
 	action = function(self, t)
+		local weapon, offweapon = self:hasDualWeapon()
+		if not weapon then
+			game.logPlayer(self, "Cadenza can only be used while dual wielding.")
+			return nil
+		end
+		
 		local tg = self:getTalentTarget(t)
 		local x, y, target = self:getTarget(tg)
 		if not target or not self:canProject(tg, x, y) then return nil end
@@ -167,7 +184,8 @@ newTalent{
 	info = function(self, t)
 		return ([[Perform a sudden, violent strike that deals %d%% damage.
 		The unexpected power of this attack may disarm and confuse (25%% strength) hit targets for %d turns.
-		Your chance to disarm and confuse the target improves with Physical Power.]]):
+		Your chance to disarm and confuse the target improves with Physical Power.
+		Can only be used while dual wielding.]]):
 		format(100 * self:combatTalentWeaponDamage(t, 1.26, 1.61), t.getDuration(self, t))
 	end,
 }
@@ -183,8 +201,15 @@ newTalent{
 	fixed_cooldown = true,
 	requires_target = true,
 	is_melee = true,
+	on_pre_use = function(self, t, silent) if not self:hasDualWeapon() then if not silent then game.logPlayer(self, "You require two weapons to use this talent.") end return false end return true end,
 	target = function(self, t) return {type="hit", range=self:getTalentRange(t)} end,
 	action = function(self, t)
+		local weapon, offweapon = self:hasDualWeapon()
+		if not weapon then
+			game.logPlayer(self, "Finale can only be used while dual wielding.")
+			return nil
+		end
+		
 		local tg = self:getTalentTarget(t)
 		local x, y, target = self:getTarget(tg)
 		if not target or not self:canProject(tg, x, y) then return nil end
@@ -194,9 +219,10 @@ newTalent{
 		return true
 	end,
 	info = function(self, t)
-		return ([[Finish off your opponent with a singular strike, inflicting %d%% weapon damage.
+		return ([[Finish off your opponent with a singular dual strike, inflicting %d%% weapon damage.
 		Beware; the sheer power of this attack will temporarily leave you exhausted, slowing down your global speed by 25%% for the next 4 turns.
-		This slow CANNOT be resisted or purged in any way.]]):
+		This slow CANNOT be resisted or purged in any way.
+		Can only be used while dual wielding.]]):
 		format(100 * self:combatTalentWeaponDamage(t, 4.00, 6.35))
 	end,
 }

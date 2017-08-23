@@ -17,7 +17,7 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
-newTalentType{ allow_random=true, type="cunning/luck-of-the-draw", min_lev = 10, name = "card invocation", description = "Perform a variety of actions, all bound by one's luck of the draw..." }
+newTalentType{ allow_random=true, type="cunning/luck-of-the-draw", min_lev = 10, name = "card invocation", no_silence = true,  description = "Perform a variety of actions, all bound by one's luck of the draw. Invocation requires the use of one's voice." }
 
 -- Generic requires for cunning based on talent level
 cuns_req1 = {
