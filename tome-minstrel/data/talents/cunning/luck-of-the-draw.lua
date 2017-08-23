@@ -69,6 +69,10 @@ newTalent{
 		
 		if randJoker == 1 then
 			game.logSeen(self, "#STEEL_BLUE#%s invokes the Ace of Diamonds!#LAST#", self.name:capitalize())
+			
+			game.level.map:particleEmitter(self.x, self.y, self:getTalentRadius(t), "generic_sploom", {rm=255, rM=255, gm=69, gM=69, bm=0, bM=0, am=35, aM=90, radius=tg.radius, basenb=60})
+			game.level.map:particleEmitter(self.x, self.y, self:getTalentRadius(t), "generic_sploom", {rm=100, rM=100, gm=200, gM=220, bm=200, bM=220, am=35, aM=90, radius=tg.radius, basenb=60})
+			game.level.map:particleEmitter(self.x, self.y, self:getTalentRadius(t), "generic_sploom", {rm=218, rM=218, gm=165, gM=165, bm=32, bM=32, am=35, aM=90, radius=tg.radius, basenb=60})
 			self:project(tg, self.x, self.y, function(px, py)
 				local target = game.level.map(px, py, Map.ACTOR)
 				if not target then return end
@@ -82,16 +86,28 @@ newTalent{
 			-- This is a 'temp' fix to prevent the log from playing these messages multiple times when multiple targets are hit.
 			if randCard == 1 then
 				game.logSeen(self, "#STEEL_BLUE#%s invokes Repulsion Blast!#LAST#", self.name:capitalize())
+				
+				game.level.map:particleEmitter(self.x, self.y, self:getTalentRadius(t), "generic_ball", {radius=self:getTalentRadius(t), rm=100, rM=125, gm=100, gM=125, bm=100, bM=125, am=200, aM=255})
 			elseif randCard == 2 then
 				game.logSeen(self, "#STEEL_BLUE#%s invokes Degrade!#LAST#", self.name:capitalize())
+				
+				game.level.map:particleEmitter(self.x, self.y, self:getTalentRadius(t), "generic_sploom", {rm=148, rM=148, gm=178, gM=178, bm=28, bM=28, am=35, aM=90, radius=tg.radius, basenb=60})
 			elseif randCard == 3 then
 				game.logSeen(self, "#STEEL_BLUE#%s invokes Terra Lances!#LAST#", self.name:capitalize())
+				
+				game.level.map:particleEmitter(self.x, self.y, 1, "volley", {radius=self:getTalentRadius(t)})
 			elseif randCard == 4 then
 				game.logSeen(self, "#STEEL_BLUE#%s invokes Arcane Negation Nova!#LAST#", self.name:capitalize())
+				
+				game.level.map:particleEmitter(self.x, self.y, 1, "shout", {size=4, distorion_factor=0.6, radius=self:getTalentRadius(t), life=30, nb_circles=4, rm=0.6, rM=0.6, gm=0.6, gM=0.6, bm=1, bM=1, am=0.6, aM=0.8})
 			elseif randCard == 5 then
 				game.logSeen(self, "#STEEL_BLUE#%s invokes Temporal Rip!#LAST#", self.name:capitalize())
+				
+				game.level.map:particleEmitter(self.x, self.y, self:getTalentRadius(t), "generic_sploom", {rm=192, rM=192, gm=192, gM=192, bm=192, bM=192, am=35, aM=90, radius=tg.radius, basenb=60})
 			elseif randCard == 6 then
 				game.logSeen(self, "#STEEL_BLUE#%s invokes Mass Confusion!#LAST#", self.name:capitalize())
+				
+				game.level.map:particleEmitter(self.x, self.y, self:getTalentRadius(t), "generic_sploom", {rm=75, rM=75, gm=0, gM=0, bm=130, bM=130, am=35, aM=90, radius=tg.radius, basenb=60})
 			end
 		end
 		
@@ -103,9 +119,6 @@ newTalent{
 				target:knockback(self.x, self.y, t.getRepulseDis(self, t))
 			elseif randCard == 2 then
 				target:setEffect(target.EFF_DECK_DEGENERATION, t.getDegenDur(self, t), {power = t.getDegenDam(self, t), spd = t.getDegenSpd(self, t), res = t.getDegenRes(self, t)})
-				
-				game.level.map:particleEmitter(self.x, self.y, tg.radius, "circle", {appear_size=2, empty_start=8, oversize=1, a=80, appear=11, limit_life=8, speed=5, img="green_demon_fire_circle", radius=tg.radius})
-				game.level.map:particleEmitter(self.x, self.y, tg.radius, "circle", {appear_size=2, oversize=1, a=80, appear=8, limit_life=11, speed=5, img="demon_fire_circle", radius=tg.radius})
 			elseif randCard == 3 then
 				target:setEffect(target.EFF_DECK_TERRA, t.getTerraDur(self, t), {power = t.getTerraDam(self, t)})
 			elseif randCard == 4 then
@@ -135,7 +148,7 @@ newTalent{
 			end
 		end)
 		
-	
+		game:playSoundNear(self, "talents/warp")
 		return true
 	end,
 	info = function(self, t)
@@ -320,7 +333,7 @@ newTalent{
 	fixed_cooldown = true,
 	no_npc_use = true,
 	range = 0,
-	radius = function(self, t) return math.floor(self:combatTalentScale(t, 2.5, 4.5, 0.75)) end,	
+	radius = function(self, t) return math.floor(self:combatTalentScale(t, 2.5, 3.5, 0.75)) end,	
 	target = function(self, t)
 		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), selffire=false, talent=t}
 	end,
@@ -365,11 +378,13 @@ newTalent{
 				if not target then return end
 				target:setEffect(target.EFF_INTIMIDATED, t.getBulwkDur(self, t), {power = t.getIntimPwr(self, t)})
 			end)
+			
+			game.level.map:particleEmitter(self.x, self.y, tg.radius, "sunburst", {radius=tg.radius, tx=self.x, ty=self.y, max_alpha=80})
 		elseif randCard == 2 then
 			game.logSeen(self, "#STEEL_BLUE#%s invokes Lunar Cloak and becomes invisible!#LAST#", self.name:capitalize())
 			self:setEffect(self.EFF_INVISIBILITY, t.getInvisDur(self, t), {power = t.getInvisPwr(self, t), penalty = 0, false})
 		elseif randCard == 3 then
-			game.logSeen(self, "#STEEL_BLUE#%s invokes The Jester and is promptly enveloped in a flash of light!#LAST#", self.name:capitalize())
+			game.logSeen(self, "#STEEL_BLUE#%s invokes The Jester and is promptly enveloped in a burst of shadow!#LAST#", self.name:capitalize())
 			self:project(tg, self.x, self.y, function(px, py)
 				local target = game.level.map(px, py, Map.ACTOR)
 				if not target then return end
@@ -377,6 +392,8 @@ newTalent{
 				target:setEffect(target.EFF_STUNNED, t.getBlindDur(self, t), {})
 			end)
 			self:setEffect(self.EFF_DECK_JESTER, t.getBlindDur(self, t) + 2, {power = t.getAvoidBuf(self, t)})	-- Makes the buff last a tad bit longer than the blind.
+			
+			game.level.map:particleEmitter(self.x, self.y, tg.radius, "shadow_flash", {radius=tg.radius, tx=self.x, ty=self.y})
 		elseif randCard == 4 then
 			game.logSeen(self, "#STEEL_BLUE#%s invokes Necromutation and morphs into a demilich!#LAST#", self.name:capitalize())
 			self:setEffect(self.EFF_NECROMUTATION, t.getInvisDur(self, t), {heroism = t.getDieAt(self, t), affinity = t.getAffinity(self, t), armor = t.getArmor(self, t), power = t.getPwr(self, t)})	-- Placeholder values!
@@ -388,6 +405,8 @@ newTalent{
 				if not target then return end
 				target:setEffect(target.EFF_FORTUNES_GAMBIT, t.getFortDur(self, t), {power = randLuk})
 			end)
+			
+			game.level.map:particleEmitter(self.x, self.y, self:getTalentRadius(t), "generic_sploom", {rm=117, rM=137, gm=235, gM=255, bm=202, bM=222, am=35, aM=90, radius=tg.radius, basenb=60})
 		else
 			game.logSeen(self, "#STEEL_BLUE#%s invokes The World, stopping time!#LAST#", self.name:capitalize())
 			game:onTickEnd(function()
@@ -405,12 +424,12 @@ newTalent{
 		local radius = self:getTalentRadius(t)
 		return ([[Invoke a card from the Deck of Oddities, triggering one of six possible effects.
 		#YELLOW#Bulwark of Faith#WHITE#
-		Gain 40%% resistance to all damage and 25%% physical damage affinity for %d turns, and intimidate all foes within %d tiles of the user for the same duration.
+		Gain 55%% resistance to all damage and 25%% physical damage affinity for %d turns, and intimidate all foes within %d tiles of the user for the same duration.
 		Intimidated foes suffer a -%d penalty to attack, spell, and mindpower. While Bulwark of Faith is active, you are rooted in place. This effect cannot be dispelled or removed early.
 		#YELLOW#Lunar Cloak#WHITE#
 		Become invisible (power %d) for %d turns. This effect does not confer a damage penalty and allows health regeneration.
 		#YELLOW#The Jester#WHITE#
-		A sudden flash of light blinds and stuns enemies in a %d-tile radius around you for %d turns. Confers a %d-turn buff which grants you a %d%% chance to avoid incoming damage.
+		A sudden burst of darkness blinds and stuns enemies in a %d-tile radius around you for %d turns. Confers a %d-turn buff which grants you a %d%% chance to avoid incoming damage.
 		#YELLOW#Necromutation#WHITE#
 		For %d turns, global speed is reduced by 50%%, and your healing mod is set to zero. Gain listed bonuses:
 		- Die only when reaching -%d health.

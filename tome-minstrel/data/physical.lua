@@ -212,6 +212,7 @@ newEffect{
 	parameters = {power=10},
 	activate = function (self, eff)
 		self:effectTemporaryValue(eff, "cancel_damage_chance", eff.power)
+		self:effectParticles(eff, {type="shader_shield", args={toback=true,  size_factor=2.5, y=0.25, img="shadow_dance_tentacle_wings"}, shader={type="tentacles", wobblingType=0, appearTime=0.8, time_factor=700, noup=0.0}})
 	end,
 }
 

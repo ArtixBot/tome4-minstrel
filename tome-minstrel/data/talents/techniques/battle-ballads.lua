@@ -379,7 +379,7 @@ newTalent{
 			target:knockback(self.x, self.y, t.getPushDis(self, t))
 		end)
 		
-		game.level.map:particleEmitter(self.x, self.y, 1, "shout", {size=4, distorion_factor=0.6, radius=self:getTalentRadius(t), life=30, nb_circles=4, rm=0.6, rM=0.6, gm=0.6, gM=0.6, bm=1, bM=1, am=0.6, aM=0.8})
+		game.level.map:particleEmitter(self.x, self.y, tg.radius, "ball_ice", {radius=tg.radius})
 		
 		if self:isTalentActive(self.T_BALLAD_OF_PRECISION) then
 			self:setEffect(self.EFF_SOLO_PRECISION, t.getBuffDur(self, t), {power = t.getCritUp(self, t)})

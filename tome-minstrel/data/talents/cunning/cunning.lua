@@ -17,6 +17,7 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
+newTalentType{ allow_random=true, type="cunning/wit", name = "wit", no_silence = true, description = "Debuff and infuriate foes with castigating wit." }
 newTalentType{ allow_random=true, type="cunning/luck-of-the-draw", min_lev = 10, name = "card invocation", no_silence = true,  description = "Perform a variety of actions, all bound by one's luck of the draw. Invocation requires the use of one's voice." }
 
 -- Generic requires for cunning based on talent level
@@ -66,4 +67,5 @@ cuns_req_high5 = {
 
 -----------------------------
 
+load("/data-minstrel/talents/cunning/wit.lua")
 load("/data-minstrel/talents/cunning/luck-of-the-draw.lua")

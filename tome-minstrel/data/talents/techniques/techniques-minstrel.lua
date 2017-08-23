@@ -23,7 +23,6 @@ newTalentType{ allow_random=true, type="technique/musical-combat", name = "music
 -- Ballads for Minstrel (WIL Scaling)
 newTalentType{ allow_random=true, type="technique/battle-ballads", name = "battle ballads", no_silence = true, description = "Bolster combat prowess." }
 newTalentType{ allow_random=true, type="technique/battle-ballads-battle-ballads", name = "battle ballads", no_silence = true, generic = true, on_mastery_change = function(self, m, tt) if self:knowTalentType("technique/battle-ballads") ~= nil then self.talents_types_mastery[tt] = self.talents_types_mastery["technique/battle-ballads"] end end, description = "Bolster combat prowess." }
-newTalentType{ allow_random=true, type="technique/wit", name = "wit", no_silence = true, description = "Debuff and infuriate foes with castigating wit." }
 newTalentType{ allow_random=true, type="technique/performance-arts", name = "performance arts", no_silence = true, generic = true, description = "Prepare oneself for the performance of a lifetime!" }
 
 -- Generic requires for techs_dex based on talent level
@@ -99,4 +98,3 @@ techs_cun_req5 = {
 load("/data-minstrel/talents/techniques/musical-combat.lua")
 load("/data-minstrel/talents/techniques/performance-arts.lua")
 load("/data-minstrel/talents/techniques/battle-ballads.lua")
-load("/data-minstrel/talents/techniques/wit.lua")

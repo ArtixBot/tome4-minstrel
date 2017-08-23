@@ -129,7 +129,7 @@ newEffect{
 newEffect{
 	name = "BULWARK_OF_FAITH", image = "effects/bulwark_of_faith.png",
 	desc = "Bulwark of Faith",
-	long_desc = function(self, eff) return ("Resilience has been enhanced, increasing all resistances by 40% and affinity for physical damage by 25% but rooting you in place.") end,
+	long_desc = function(self, eff) return ("Resilience has been enhanced, increasing all resistances by 55% and affinity for physical damage by 25% but rooting you in place.") end,
 	type = "other",
 	subtype = { arcane=true },
 	status = "detrimental",
@@ -137,7 +137,7 @@ newEffect{
 	on_gain = function(self, err) return "#Target# becomes a bulwark of faith!", "+Bulwark of Faith" end,
 	on_lose = function(self, err) return "#Target# is no longer resilient.", "-Bulwark of Faith" end,
 	activate = function(self, eff)
-		eff.resist = self:addTemporaryValue("resists", {all=40})
+		eff.resist = self:addTemporaryValue("resists", {all=55})
 		self:effectTemporaryValue(eff, "damage_affinity", {[DamageType.PHYSICAL]=25})
 		eff.tmpid = self:addTemporaryValue("never_move", 1)
 	end,
