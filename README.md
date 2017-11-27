@@ -21,3 +21,7 @@ Thanks to:
 - ToME4's IRC channel for immeasurable amounts of help in debugging.
 - Andrew Plumb for lute image (used in Victario's Trick Lute).
 - Nicolas "DarkGod" Casalini for creating the game!
+
+Legal Stuff:
+
+Distributed under the GNU General Public License v3.0, if that means anything. If you change the files in any way I am not responsible for any terrible things that may happen to your game.
